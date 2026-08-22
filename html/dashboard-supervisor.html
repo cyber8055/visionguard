@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supervisor Portal | VisionGuard Operations</title>
+  
+  <link rel="stylesheet" href="../assets/css/visionguard.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  
+  <style>
+    .permit-cb-card {
+      background: var(--vg-bg-surface-elevated);
+      border: 1px solid var(--vg-border);
+      border-radius: var(--vg-radius);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .permit-cb-card:hover {
+      border-color: var(--vg-accent-primary);
+    }
+    .permit-cb-card input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: var(--vg-accent-primary);
+    }
+    
+    .form-group-sm { margin-bottom: 16px; }
+    .form-label-sm {
+      display: block; font-size: 13px; font-weight: 600; color: var(--vg-text-secondary); margin-bottom: 6px;
+    }
+    .form-input-sm {
+      width: 100%; padding: 10px 14px; font-size: 14px;
+      background: var(--vg-bg-main); border: 1px solid var(--vg-border);
+      border-radius: var(--vg-radius); color: var(--vg-text-primary);
+      font-family: inherit; transition: all 0.2s;
+    }
+    .form-input-sm:focus {
+      outline: none; border-color: var(--vg-accent-primary);
+      box-shadow: 0 0 0 3px var(--vg-accent-glow);
+    }
+
+    .sig-canvas {
+      background: #FFFFFF;
+      border: 2px dashed var(--vg-accent-primary);
+      border-radius: var(--vg-radius);
+      cursor: crosshair;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="vg-app-shell">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="vg-sidebar">
+      <div class="vg-sidebar-brand">
+        <img src="../assets/img/new-logo.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
+        <span>VisionGuard</span>
+      </div>
+
+      <nav class="vg-sidebar-nav">
+        <a href="dashboard-supervisor.html" class="vg-nav-link active">
+          <i class='bx bx-hard-hat'></i> Field Operations
+        </a>
+      </nav>
+
+      <div class="vg-sidebar-user">
+        <div class="vg-user-info">
+          <h5>Field Supervisor</h5>
+          <p>Permit Initiator</p>
+        </div>
+        <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
+          <i class='bx bx-log-out'></i>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      
+      <header class="vg-header">
+        <div class="vg-header-title">
+          <h2>Field Operations & Permit Generator</h2>
+        </div>
+      </header>
+
+      <main class="vg-content-area">
+        
+        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px;">
+          
+          <!-- Left Column: Initiate Combined PTW Form -->
+          <div class="vg-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h3 style="font-family: var(--font-outfit); font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class='bx bx-plus-circle' style="color: var(--vg-status-warning);"></i> Initiate Work Permit
+              </h3>
+              <span class="vg-badge vg-badge-accent">Multi-Permit Generator</span>
+            </div>
+
+            <form id="formInitiatePermit" onsubmit="handleCreatePermit(event)">
+              
+              <!-- Category Selector Cards -->
+              <div class="form-group-sm">
+                <label class="form-label-sm">Select Applicable Permit Categories (Supports Combined Scopes):</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Confined Space" id="cb_cs" checked />
+                    <span style="font-size: 13px; font-weight: 500;">Confined Space Entry</span>
+                  </label>
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Excavation" id="cb_ex" />
+                    <span style="font-size: 13px; font-weight: 500;">Excavation (>1.5m)</span>
+                  </label>
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Electrical Work" id="cb_el" />
+                    <span style="font-size: 13px; font-weight: 500;">Electrical Work / LOTO</span>
+                  </label>
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Fragile Roof" id="cb_rf" />
+                    <span style="font-size: 13px; font-weight: 500;">Work at Height / Roof</span>
+                  </label>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group-sm">
+                  <label class="form-label-sm" for="job_type">Job Type / Reference</label>
+                  <input type="text" class="form-input-sm" id="job_type" value="MOC / PM / Project" required />
+                </div>
+                <div class="form-group-sm">
+                  <label class="form-label-sm" for="equipment">Equipment / Tag No.</label>
+                  <input type="text" class="form-input-sm" id="equipment" value="Reactor Vessel V-101" required />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                <div class="form-group-sm">
+                  <label class="form-label-sm" for="from_dept">From Dept</label>
+                  <input type="text" class="form-input-sm" id="from_dept" value="Operations" required />
+                </div>
+                <div class="form-group-sm">
+                  <label class="form-label-sm" for="to_dept">To Dept</label>
+                  <input type="text" class="form-input-sm" id="to_dept" value="Maintenance" required />
+                </div>
+                <div class="form-group-sm">
+                  <label class="form-label-sm" for="location">Location / Zone</label>
+                  <input type="text" class="form-input-sm" id="location" value="Zone 12 - Unit 01" required />
+                </div>
+              </div>
+
+              <div class="form-group-sm">
+                <label class="form-label-sm" for="description">Detailed Work Scope Description</label>
+                <textarea class="form-input-sm" id="description" rows="3" required>Internal steam cleaning, chemical residue removal, and wall thickness inspection.</textarea>
+              </div>
+
+              <!-- AI JSA Trigger Box -->
+              <div style="background: rgba(6, 182, 212, 0.05); border: 1px dashed rgba(6, 182, 212, 0.3); border-radius: var(--vg-radius); padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h5 style="font-size: 14px; font-weight: 600; color: var(--vg-accent-primary); display: flex; align-items: center; gap: 6px;">
+                      <i class='bx bx-brain'></i> AI Combined JSA Engine
+                    </h5>
+                    <p style="font-size: 12px; color: var(--vg-text-muted);">Generates composite hazard controls across selected categories</p>
+                  </div>
+                  <button type="button" class="vg-btn vg-btn-secondary vg-btn-sm" onclick="generateCombinedJsa()">
+                    <i class='bx bx-sparkles'></i> Generate JSA
+                  </button>
+                </div>
+                <div id="jsa-preview-box" style="display:none; margin-top: 12px; font-size: 13px;"></div>
+              </div>
+
+              <!-- Signature Canvas -->
+              <div class="form-group-sm">
+                <label class="form-label-sm"><i class='bx bx-pencil' style="color: var(--vg-status-warning);"></i> Digital Signature Canvas (Issuer Sign-off):</label>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <canvas id="sig-canvas-initiator" class="sig-canvas" width="450" height="110"></canvas>
+                  <button type="button" class="vg-btn vg-btn-secondary vg-btn-sm" id="btn-clear-sig"><i class='bx bx-refresh'></i> Clear Canvas</button>
+                </div>
+              </div>
+
+              <button type="submit" class="vg-btn vg-btn-primary" style="width: 100%; padding: 14px; font-size: 15px;">
+                Submit Combined Permit for Safety Review &rarr;
+              </button>
+            </form>
+          </div>
+
+          <!-- Right Column: Active & Submitted Permits Queue -->
+          <div class="vg-card">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i class='bx bx-list-check' style="color: var(--vg-status-warning);"></i> Active & Submitted Permits
+            </h3>
+            <div id="permits-list">
+              <div style="text-align: center; padding: 40px; color: var(--vg-text-muted);"><i class='bx bx-loader-alt bx-spin' style="font-size: 24px;"></i><br>Fetching active permits...</div>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+
+  <script src="../assets/js/signature-canvas.js"></script>
+  <script>
+    let initiatorSigPad;
+    window.addEventListener('DOMContentLoaded', () => {
+      initiatorSigPad = new SignaturePad('sig-canvas-initiator', 'btn-clear-sig');
+    });
+
+    function getSelectedTypes() {
+      const cbs = document.querySelectorAll('.permit-type-cb:checked');
+      return Array.from(cbs).map(c => c.value);
+    }
+
+    async function generateCombinedJsa() {
+      const types = getSelectedTypes();
+      if (types.length === 0) { alert('Please select at least one permit category.'); return; }
+      const desc = document.getElementById('description').value;
+      const box = document.getElementById('jsa-preview-box');
+
+      box.style.display = 'block';
+      box.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Merging hazard lists & generating AI JSA...';
+
+      try {
+        const res = await fetch('../php/api/jsa-api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ job_description: desc, permit_types: types })
+        });
+        const data = await res.json();
+        box.innerHTML = `
+          <div style="font-weight:600; color:var(--vg-accent-primary); margin-bottom:6px;">✓ ${data.jsa_number} (Recommended: ${data.recommended_permit}):</div>
+          <ol style="padding-left:20px; margin-bottom:8px; color:var(--vg-text-primary);">
+            ${data.steps.map(s => `<li><strong>${s.step_description}:</strong> ${s.controls}</li>`).join('')}
+          </ol>
+          <div style="font-size:11px; color:var(--vg-status-warning);">⚡ Special Precautions: ${data.special_precautions.join(' | ')}</div>
+        `;
+      } catch (err) {
+        box.innerHTML = '<span style="color:var(--vg-status-danger);">Failed to generate combined JSA.</span>';
+      }
+    }
+
+    async function loadPermits() {
+      try {
+        const res = await fetch('../php/api/permits-api.php');
+        const data = await res.json();
+        const container = document.getElementById('permits-list');
+
+        if (data.success && data.permits.length > 0) {
+          container.innerHTML = data.permits.map(p => `
+            <div style="background:var(--vg-bg-surface-elevated); border-left:4px solid var(--vg-accent-primary); border-radius:var(--vg-radius); padding:16px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span class="code-font" style="font-weight:700;">${p.serial_no}</span>
+                <span class="vg-badge vg-badge-info">${p.status}</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; margin-bottom:4px;">${p.permit_type} - ${p.equipment}</div>
+              <div style="font-size:12px; color:var(--vg-text-muted); margin-bottom:12px;"><i class='bx bx-map'></i> ${p.location} | Initiator: ${p.company_supervisor}</div>
+              <div style="display:flex; gap:8px;">
+                <button onclick="openPermitModal('${p.serial_no}')" class="vg-btn vg-btn-secondary vg-btn-sm"><i class='bx bx-show'></i> View Form</button>
+                <a href="permit-view.html?id=${p.id}&print=1" class="vg-btn vg-btn-primary vg-btn-sm" target="_blank"><i class='bx bx-printer'></i> Print PDF</a>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--vg-text-muted);">No active permits found.</div>';
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function handleCreatePermit(e) {
+      e.preventDefault();
+      const types = getSelectedTypes();
+      if (types.length === 0) { alert('Please select at least one permit category.'); return; }
+
+      const payload = {
+        permit_type: types.join(' + '),
+        job_type: document.getElementById('job_type').value,
+        from_dept: document.getElementById('from_dept').value,
+        to_dept: document.getElementById('to_dept').value,
+        section: 'Unit 01', plant: 'Plant A',
+        location: document.getElementById('location').value,
+        equipment: document.getElementById('equipment').value,
+        description: document.getElementById('description').value,
+        carried_out_by: 'Maintenance Team',
+        company_supervisor: 'Deepak Kumar',
+        signature_data: initiatorSigPad ? initiatorSigPad.toDataURL() : null
+      };
+
+      try {
+        const res = await fetch('../php/api/permits-api.php?action=create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('✓ Combined Permit ' + data.serial_no + ' created successfully!');
+          loadPermits();
+        }
+      } catch (err) { alert('Error creating permit.'); }
+    }
+
+    loadPermits();
+
+    function openPermitModal(permitId) {
+      document.getElementById('modalTitle').innerText = 'Permit Details: ' + permitId;
+      document.getElementById('permitModal').style.display = 'flex';
+    }
+  </script>
+  <!-- Permit View Modal -->
+  <div id="permitModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--vg-bg-surface); border:1px solid var(--vg-border); border-radius:var(--vg-radius-lg); width:100%; max-width:800px; max-height:90vh; display:flex; flex-direction:column; box-shadow:var(--vg-shadow);">
+      <div style="padding:20px; border-bottom:1px solid var(--vg-border); display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="modalTitle" style="font-family:var(--font-outfit); font-size:20px; font-weight:700;">Permit Details</h3>
+        <button onclick="document.getElementById('permitModal').style.display='none'" style="background:transparent; border:none; color:var(--vg-text-secondary); font-size:24px; cursor:pointer;"><i class='bx bx-x'></i></button>
+      </div>
+      <div style="padding:20px; overflow-y:auto; flex:1; font-size:14px; color:var(--vg-text-secondary);">
+        <p>Previewing details for permit securely within the dashboard.</p>
+        <div style="background:var(--vg-bg-input); padding:16px; border-radius:var(--vg-radius); margin-top:16px;">
+          <h4 style="color:var(--vg-text-primary); margin-bottom:8px;">Scope of Work</h4>
+          <p>Confined space entry, chemical residue cleaning, and safety checks verified.</p>
+        </div>
+      </div>
+      <div style="padding:20px; border-top:1px solid var(--vg-border); display:flex; justify-content:flex-end; gap:12px;">
+        <button onclick="document.getElementById('permitModal').style.display='none'" class="vg-btn vg-btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

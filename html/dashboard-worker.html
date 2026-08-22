@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worker Safety Passport | VisionGuard</title>
+  
+  <link rel="stylesheet" href="../assets/css/visionguard.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  
+  <style>
+    /* Ultra-Premium Digital Safety Passport Styling */
+    .passport-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 20px;
+    }
+
+    .passport-card {
+      background: linear-gradient(145deg, rgba(17, 24, 39, 0.9) 0%, rgba(31, 41, 55, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      border-radius: var(--vg-radius-xl);
+      padding: 48px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      max-width: 850px;
+      width: 100%;
+    }
+    
+    .passport-card::before {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    .passport-card::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .profile-avatar {
+      width: 110px; height: 110px;
+      border-radius: 24px;
+      background: #1e293b;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; color: var(--vg-text-secondary);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    .profile-avatar::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 28px;
+      border: 2px solid var(--vg-accent-primary);
+      opacity: 0.6;
+    }
+
+    .cert-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 20px; 
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--vg-radius);
+      font-size: 14px; font-weight: 500;
+      color: var(--vg-text-primary);
+      transition: all 0.3s ease;
+    }
+    .cert-pill:hover {
+      background: rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .qr-placeholder {
+      width: 140px; height: 140px;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      border: 4px solid var(--vg-bg-surface-elevated);
+    }
+    
+    .status-panel {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--vg-radius-lg);
+      padding: 24px;
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="vg-app-shell">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="vg-sidebar">
+      <div class="vg-sidebar-brand">
+        <img src="../assets/img/new-logo.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
+        <span>VisionGuard</span>
+      </div>
+
+      <nav class="vg-sidebar-nav">
+        <a href="dashboard-worker.html" class="vg-nav-link active">
+          <i class='bx bx-id-card'></i> My Safety Passport
+        </a>
+      </nav>
+
+      <div class="vg-sidebar-user">
+        <div class="vg-user-info">
+          <h5>Deepak Kumar</h5>
+          <p>Field Worker (EMP-884920)</p>
+        </div>
+        <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
+          <i class='bx bx-log-out'></i>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      
+      <header class="vg-header">
+        <div class="vg-header-title">
+          <h2>Worker Safety Credentials</h2>
+        </div>
+        <div class="vg-status-indicator">
+          <div class="vg-status-dot"></div> SITE ACCESS GRANTED
+        </div>
+      </header>
+
+      <main class="vg-content-area">
+        
+        <div class="passport-container">
+          
+          <!-- Main Digital Safety Passport -->
+          <div class="passport-card">
+            
+            <!-- Passport Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; position: relative; z-index: 10;">
+              <div style="display: flex; gap: 28px; align-items: center;">
+                <div class="profile-avatar">
+                  <i class='bx bx-user'></i>
+                </div>
+                <div>
+                  <span class="vg-badge vg-badge-accent" style="margin-bottom: 8px; letter-spacing: 1px;"><i class='bx bx-shield-quarter'></i> Official Safety Passport</span>
+                  <h1 style="font-family: var(--font-outfit); font-size: 36px; font-weight: 800; color: var(--vg-text-primary); letter-spacing: -0.5px; margin-bottom: 4px;">Deepak Kumar</h1>
+                  <p style="font-size: 15px; color: var(--vg-text-secondary); font-family: var(--font-mono);">
+                    Worker ID: EMP-884920 <span style="color: var(--vg-border-hover); margin: 0 8px;">|</span> Industrial Maintenance Corp.
+                  </p>
+                </div>
+              </div>
+              
+              <!-- QR Code Verification Badge -->
+              <div class="qr-placeholder" title="Scan for Security Gate Check-in">
+                <!-- Inline SVG QR Code representation -->
+                <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="white"/>
+                  <path d="M10 10H40V40H10V10ZM20 20V30H30V20H20Z" fill="black"/>
+                  <path d="M60 10H90V40H60V10ZM70 20V30H80V20H70Z" fill="black"/>
+                  <path d="M10 60H40V90H10V60ZM20 70V80H30V70H20Z" fill="black"/>
+                  <rect x="50" y="50" width="15" height="15" fill="black"/>
+                  <rect x="75" y="50" width="15" height="15" fill="black"/>
+                  <rect x="50" y="75" width="15" height="15" fill="black"/>
+                  <rect x="75" y="75" width="15" height="15" fill="black"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Medical & Induction Status Badges -->
+            <div class="status-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;">
+              <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.15); border-left: 4px solid var(--vg-status-success); border-radius: var(--vg-radius); padding: 20px;">
+                <div style="font-size: 13px; color: var(--vg-status-success); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">
+                  <i class='bx bx-pulse'></i> Medical Clearance
+                </div>
+                <div style="font-size: 18px; font-weight: 800; color: var(--vg-text-primary);">VERIFIED FIT</div>
+                <div style="font-size: 12px; color: var(--vg-text-muted); margin-top: 4px; font-family: var(--font-mono);">EXP: 15-DEC-2026</div>
+              </div>
+
+              <div style="background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.15); border-left: 4px solid var(--vg-accent-primary); border-radius: var(--vg-radius); padding: 20px;">
+                <div style="font-size: 13px; color: var(--vg-accent-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">
+                  <i class='bx bx-certification'></i> Safety Induction
+                </div>
+                <div style="font-size: 18px; font-weight: 800; color: var(--vg-text-primary);">COMPLETED (OISD-105)</div>
+                <div style="font-size: 12px; color: var(--vg-text-muted); margin-top: 4px; font-family: var(--font-mono);">SITE PASSPORT ACTIVE</div>
+              </div>
+            </div>
+
+            <!-- Authorized Certifications -->
+            <div style="position: relative; z-index: 10;">
+              <h4 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--vg-text-primary); display: flex; align-items: center; gap: 8px;">
+                <i class='bx bx-award' style="color: var(--vg-status-warning); font-size: 24px;"></i> Certified Skill Endorsements
+              </h4>
+              
+              <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 40px;">
+                <div class="cert-pill">
+                  <i class='bx bx-check-circle' style="color: var(--vg-status-success); font-size: 20px;"></i>
+                  <span>Confined Space Entrant (Authorized)</span>
+                </div>
+                <div class="cert-pill">
+                  <i class='bx bx-check-circle' style="color: var(--vg-status-success); font-size: 20px;"></i>
+                  <span>Hot Work Spark Shield Level 2</span>
+                </div>
+                <div class="cert-pill">
+                  <i class='bx bx-check-circle' style="color: var(--vg-status-success); font-size: 20px;"></i>
+                  <span>SCBA Breathing Apparatus Operator</span>
+                </div>
+                <div class="cert-pill">
+                  <i class='bx bx-check-circle' style="color: var(--vg-status-success); font-size: 20px;"></i>
+                  <span>Work at Height Harness Inspection</span>
+                </div>
+              </div>
+
+              <!-- Mandatory PPE Assigned -->
+              <h4 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--vg-text-primary); display: flex; align-items: center; gap: 8px;">
+                <i class='bx bx-shield' style="color: var(--vg-accent-primary); font-size: 24px;"></i> Issued & Inspected PPE
+              </h4>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <span class="vg-badge vg-badge-info" style="padding: 8px 12px; font-size: 12px;"><i class='bx bx-hard-hat'></i> Helmet #H-092</span>
+                <span class="vg-badge vg-badge-info" style="padding: 8px 12px; font-size: 12px;"><i class='bx bxs-shoe'></i> Safety Shoes S3</span>
+                <span class="vg-badge vg-badge-info" style="padding: 8px 12px; font-size: 12px;"><i class='bx bx-wind'></i> Gas Detector #G-44</span>
+                <span class="vg-badge vg-badge-info" style="padding: 8px 12px; font-size: 12px;"><i class='bx bx-closet'></i> Flame-Retardant Coverall</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

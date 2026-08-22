@@ -1,0 +1,59 @@
+[
+    {
+        "id": 5,
+        "serial_no": "PTW-20260822-8274",
+        "permit_type": "Confined Space",
+        "location": "Zone 12 - Unit 01",
+        "equipment": "Reactor Vessel V-101",
+        "company_supervisor": "Deepak Kumar",
+        "status": "SUBMITTED",
+        "job_type": "MOC \/ PM \/ Project",
+        "description": "Internal steam cleaning, chemical residue removal, and wall thickness inspection.",
+        "created_at": "2026-08-22 13:53:53"
+    },
+    {
+        "id": 4,
+        "serial_no": "PTW-20260822-6357",
+        "permit_type": "Confined Space + Excavation",
+        "location": "Zone 12 - Unit 01",
+        "equipment": "Reactor Vessel V-101",
+        "company_supervisor": "Deepak Kumar",
+        "status": "SUBMITTED",
+        "job_type": "MOC \/ PM \/ Project",
+        "description": "Internal steam cleaning, chemical residue removal, and wall thickness inspection.",
+        "created_at": "2026-08-22 13:03:56"
+    },
+    {
+        "id": 1,
+        "serial_no": "PTW-20260822-5501",
+        "permit_type": "Confined Space + Excavation",
+        "location": "Zone 12 - Unit 01",
+        "equipment": "Reactor Vessel V-101",
+        "company_supervisor": "Deepak Kumar",
+        "status": "APPROVED",
+        "job_type": "MOC \/ GPC \/ BD \/ PM \/ USC \/ Project",
+        "created_at": "2026-08-22 08:00:00"
+    },
+    {
+        "id": 2,
+        "serial_no": "PTW-20260822-5502",
+        "permit_type": "Electrical Work \/ LOTO",
+        "location": "Substation 04 - MCC-02",
+        "equipment": "Feeder Pump P-204",
+        "company_supervisor": "Rajesh Sharma",
+        "status": "PENDING MANAGER",
+        "job_type": "PM Maintenance",
+        "created_at": "2026-08-22 09:30:00"
+    },
+    {
+        "id": 3,
+        "serial_no": "PTW-20260822-5503",
+        "permit_type": "Fragile Roof \/ Work at Height",
+        "location": "Warehouse Shed 3",
+        "equipment": "Roof Sheet Replacement",
+        "company_supervisor": "Amit Verma",
+        "status": "ACTIVE",
+        "job_type": "Civil Repair",
+        "created_at": "2026-08-22 11:15:00"
+    }
+]

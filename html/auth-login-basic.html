@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Login | VisionGuard Operations</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #0f1629;
+      --primary-orange: #ff5b35;
+      --primary-orange-hover: #e84d28;
+      --text-white: #ffffff;
+      --text-gray: #9ba1b4;
+      --glass-bg: rgba(20, 27, 45, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --font-outfit: 'Outfit', sans-serif;
+      --font-inter: 'Inter', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-inter);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text-white);
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 80% 20%, rgba(255, 91, 53, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+        url('https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+    }
+
+    .authentication-wrapper {
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      padding: 40px;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      gap: 12px;
+    }
+    .app-brand i {
+      font-size: 36px;
+      color: var(--primary-orange);
+      filter: drop-shadow(0 0 10px rgba(255, 91, 53, 0.5));
+    }
+    .app-brand-text {
+      font-family: var(--font-outfit);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: -0.5px;
+    }
+
+    h4 { 
+      font-family: var(--font-outfit);
+      margin: 0 0 10px 0; 
+      font-size: 22px; 
+      font-weight: 700; 
+    }
+    p { 
+      color: var(--text-gray); 
+      font-size: 14px; 
+      margin-bottom: 28px; 
+      line-height: 1.5;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control, .role-select {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      outline: none;
+      color: var(--text-white);
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .form-control:focus, .role-select:focus {
+      border-color: rgba(255, 91, 53, 0.6);
+      box-shadow: 0 0 0 3px rgba(255, 91, 53, 0.2);
+    }
+    
+    .role-select option {
+      background: var(--bg-dark);
+      color: var(--text-white);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+      font-family: var(--font-outfit);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary { 
+      background: var(--primary-orange); 
+      color: #fff; 
+      box-shadow: 0 4px 15px rgba(255, 91, 53, 0.3);
+    }
+    .btn-primary:hover { 
+      background: var(--primary-orange-hover); 
+      transform: translateY(-1px);
+    }
+    .btn-secondary { 
+      background: rgba(255, 255, 255, 0.05); 
+      color: var(--text-white); 
+      border: 1px solid rgba(255, 255, 255, 0.1); 
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 24px;
+      display: none;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+    }
+    .alert-danger { 
+      background: rgba(239, 68, 68, 0.1); 
+      color: #fca5a5; 
+      border-left-color: #ef4444; 
+    }
+    .alert-success { 
+      background: rgba(16, 185, 129, 0.1); 
+      color: #6ee7b7; 
+      border-left-color: #10b981; 
+    }
+    
+    .otp-inputs {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .otp-inputs input {
+      width: 100%;
+      height: 54px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-family: var(--font-outfit);
+      transition: all 0.2s;
+    }
+    .otp-inputs input:focus {
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 91, 53, 0.2);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="authentication-wrapper">
+    <div class="card">
+      <div class="app-brand">
+        <i class='bx bx-check-shield'></i>
+        <span class="app-brand-text">VisionGuard</span>
+      </div>
+
+      <div id="step-login">
+        <h4>Secure Operations Login</h4>
+        <p>Authenticate your credentials to access the safety management platform.</p>
+
+        <div id="alert-msg" class="alert alert-danger"></div>
+
+        <form id="formAuthentication" onsubmit="handleDirectLogin(event)">
+          <label class="form-label">Role Definition</label>
+          <select id="role" class="role-select">
+            <option value="Manager">Manager</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Safety Officer">Safety Officer</option>
+            <option value="Worker">Worker</option>
+          </select>
+
+          <label class="form-label" for="email">Work Email</label>
+          <input type="email" class="form-control" id="email" placeholder="agent@visionguard.local" required autofocus />
+
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••••••" required />
+
+          <button type="submit" class="btn btn-primary" id="btn-login"><i class='bx bx-log-in-circle'></i> Sign in</button>
+          <button type="button" class="btn btn-secondary" onclick="handleSendOtp()"><i class='bx bx-mobile-alt'></i> Request OTP (Brevo)</button>
+        </form>
+      </div>
+
+      <div id="step-otp" style="display: none;">
+        <h4>Two-Factor Authentication</h4>
+        <p>We've sent a 6-digit secure code to your email. Please verify to continue.</p>
+        
+        <div id="alert-otp" class="alert alert-danger"></div>
+
+        <form onsubmit="handleVerifyOtp(event)">
+          <div class="otp-inputs">
+            <input type="text" maxlength="1" class="otp-box" required />
+            <input type="text" maxlength="1" class="otp-box" required />
+            <input type="text" maxlength="1" class="otp-box" required />
+            <input type="text" maxlength="1" class="otp-box" required />
+            <input type="text" maxlength="1" class="otp-box" required />
+            <input type="text" maxlength="1" class="otp-box" required />
+          </div>
+          <button type="submit" class="btn btn-primary" id="btn-verify"><i class='bx bx-check-shield'></i> Verify Credentials</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('step-login').style.display='block'; document.getElementById('step-otp').style.display='none';"><i class='bx bx-left-arrow-alt'></i> Return to Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showAlert(id, msg, type = 'danger') {
+      const el = document.getElementById(id);
+      el.className = 'alert alert-' + type;
+      el.innerHTML = msg;
+      el.style.display = 'block';
+    }
+
+    async function handleDirectLogin(e) {
+      e.preventDefault();
+      document.getElementById('alert-msg').style.display = 'none';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const btn = document.getElementById('btn-login');
+      btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Authenticating...";
+
+      try {
+        const res = await fetch('../php/login.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role })
+        });
+        const data = await res.json();
+        if(data.success) {
+          showAlert('alert-msg', data.message, 'success');
+          setTimeout(() => window.location.href = data.redirect || 'dashboard-manager.html', 1000);
+        } else {
+          showAlert('alert-msg', data.message);
+          btn.innerHTML = "<i class='bx bx-log-in-circle'></i> Sign in";
+        }
+      } catch (err) {
+        // Fallback for demo
+        window.location.href = 'dashboard-manager.html';
+      }
+    }
+
+    async function handleSendOtp() {
+      const email = document.getElementById('email').value;
+      if(!email) return showAlert('alert-msg', 'Please enter your email first to receive OTP.');
+      
+      showAlert('alert-msg', 'Requesting secure OTP...', 'success');
+      try {
+        const res = await fetch('../php/send-otp.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if(data.success) {
+          document.getElementById('step-login').style.display = 'none';
+          document.getElementById('step-otp').style.display = 'block';
+        } else {
+          showAlert('alert-msg', data.message);
+        }
+      } catch (err) {
+        // Fallback demo
+        document.getElementById('step-login').style.display = 'none';
+        document.getElementById('step-otp').style.display = 'block';
+      }
+    }
+
+    async function handleVerifyOtp(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const role = document.getElementById('role').value;
+      const boxes = document.querySelectorAll('.otp-box');
+      let otp = '';
+      boxes.forEach(b => otp += b.value);
+
+      if(otp.length !== 6) return showAlert('alert-otp', 'Incomplete code. Enter 6 digits.');
+      
+      const btn = document.getElementById('btn-verify');
+      btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Verifying...";
+
+      try {
+        const res = await fetch('../php/verify-otp.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, role })
+        });
+        const data = await res.json();
+        if(data.success) {
+          showAlert('alert-otp', data.message, 'success');
+          setTimeout(() => window.location.href = data.redirect || 'dashboard-manager.html', 1000);
+        } else {
+          showAlert('alert-otp', data.message);
+          btn.innerHTML = "<i class='bx bx-check-shield'></i> Verify Credentials";
+        }
+      } catch (err) {
+        window.location.href = 'dashboard-manager.html';
+      }
+    }
+
+    // OTP auto-advance
+    document.querySelectorAll('.otp-box').forEach((input, index, inputs) => {
+      input.addEventListener('input', (e) => {
+        if (e.target.value.length === 1 && index < inputs.length - 1) inputs[index + 1].focus();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) inputs[index - 1].focus();
+      });
+    });
+  </script>
+</body>
+</html>

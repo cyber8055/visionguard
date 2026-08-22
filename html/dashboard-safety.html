@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safety Officer Portal | VisionGuard Operations</title>
+  
+  <link rel="stylesheet" href="../assets/css/visionguard.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="vg-app-shell">
+    
+    <aside class="vg-sidebar">
+      <div class="vg-sidebar-brand">
+        <img src="../assets/img/new-logo.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
+        <span>VisionGuard</span>
+      </div>
+
+      <nav class="vg-sidebar-nav">
+        <a href="dashboard-safety.html" class="vg-nav-link active">
+          <i class='bx bx-shield-quarter'></i> Safety Checks
+        </a>
+      </nav>
+
+      <div class="vg-sidebar-user">
+        <div class="vg-user-info">
+          <h5>Safety Inspector</h5>
+          <p>Compliance Officer</p>
+        </div>
+        <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
+          <i class='bx bx-log-out'></i>
+        </a>
+      </div>
+    </aside>
+
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      
+      <header class="vg-header">
+        <div class="vg-header-title">
+          <h2>Safety Verification & Gas Testing Center</h2>
+        </div>
+      </header>
+
+      <main class="vg-content-area">
+        
+        <div class="vg-grid-4">
+          <div class="vg-card">
+            <div class="vg-metric-title">Gas Tests Today</div>
+            <div class="vg-metric-value" style="color: var(--vg-accent-primary);">12</div>
+          </div>
+          <div class="vg-card">
+            <div class="vg-metric-title">Gas Levels Normal</div>
+            <div class="vg-metric-value" style="color: var(--vg-status-success);">12 / 12</div>
+          </div>
+          <div class="vg-card">
+            <div class="vg-metric-title">Pending Clearances</div>
+            <div class="vg-metric-value" style="color: var(--vg-status-warning);">2</div>
+          </div>
+          <div class="vg-card">
+            <div class="vg-metric-title">Hazard Compliance</div>
+            <div class="vg-metric-value" style="color: var(--vg-status-success);">100%</div>
+          </div>
+        </div>
+
+        <div class="vg-card" style="padding: 0; overflow: hidden;">
+          <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
+              <i class='bx bx-shield-check' style="color: var(--vg-status-success);"></i> Safety Clearances & Atmospheric Gas Logs
+            </h3>
+            <span class="vg-badge vg-badge-success">OISD-105 Standards Active</span>
+          </div>
+
+          <div class="vg-table-wrapper">
+            <table class="vg-table">
+              <thead>
+                <tr>
+                  <th>Permit ID</th>
+                  <th>Location</th>
+                  <th>Atmospheric Test (O2 / LEL / H2S)</th>
+                  <th>Checklist Verification</th>
+                  <th>Safety Sign-off</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="code-font">PTW-20260822-5501</td>
+                  <td>Zone 12 - Reactor Tank V-101</td>
+                  <td><span class="vg-badge vg-badge-success">O2: 20.9% | LEL: 0% | H2S: 0ppm</span></td>
+                  <td><span class="vg-badge vg-badge-success">✓ 14/14 Items Passed</span></td>
+                  <td><span class="vg-badge vg-badge-accent">Verified by Officer R. Sharma</span></td>
+                  <td>
+                    <button onclick="openPermitModal('PTW-20260822-5501')" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-check-double'></i> Inspect & Sign</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="code-font">PTW-20260822-0250</td>
+                  <td>Zone 04 - Cable Trench Line</td>
+                  <td><span class="vg-badge vg-badge-info">N/A (Excavation)</span></td>
+                  <td><span class="vg-badge vg-badge-success">✓ Underground Line Clear</span></td>
+                  <td><span class="vg-badge vg-badge-accent">Verified by Officer R. Sharma</span></td>
+                  <td>
+                    <button onclick="openPermitModal('PTW-20260822-0250')" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-check-double'></i> Inspect & Sign</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+  <!-- Permit View Modal -->
+  <div id="permitModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--vg-bg-surface); border:1px solid var(--vg-border); border-radius:var(--vg-radius-lg); width:100%; max-width:800px; max-height:90vh; display:flex; flex-direction:column; box-shadow:var(--vg-shadow);">
+      <div style="padding:20px; border-bottom:1px solid var(--vg-border); display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="modalTitle" style="font-family:var(--font-outfit); font-size:20px; font-weight:700;">Permit Details</h3>
+        <button onclick="document.getElementById('permitModal').style.display='none'" style="background:transparent; border:none; color:var(--vg-text-secondary); font-size:24px; cursor:pointer;"><i class='bx bx-x'></i></button>
+      </div>
+      <div style="padding:20px; overflow-y:auto; flex:1; font-size:14px; color:var(--vg-text-secondary);">
+        <p>Previewing details for permit securely within the dashboard.</p>
+        <div style="background:var(--vg-bg-input); padding:16px; border-radius:var(--vg-radius); margin-top:16px;">
+          <h4 style="color:var(--vg-text-primary); margin-bottom:8px;">Scope of Work</h4>
+          <p>Confined space entry, chemical residue cleaning, and safety checks verified.</p>
+        </div>
+      </div>
+      <div style="padding:20px; border-top:1px solid var(--vg-border); display:flex; justify-content:flex-end; gap:12px;">
+        <button onclick="document.getElementById('permitModal').style.display='none'" class="vg-btn vg-btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openPermitModal(permitId) {
+      document.getElementById('modalTitle').innerText = 'Permit Details: ' + permitId;
+      document.getElementById('permitModal').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>

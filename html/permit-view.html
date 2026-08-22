@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Permit Document Viewer | VisionGuard</title>
+  
+  <link rel="stylesheet" href="../assets/css/visionguard.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  
+  <style>
+    body {
+      background: var(--vg-bg-base);
+    }
+    .permit-document-sheet {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      color: #1A202C;
+      border: 2px solid #000;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .permit-document-sheet table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .permit-document-sheet td, .permit-document-sheet th { border: 1px solid #000000; padding: 6px 10px; font-size: 12px; color: #000; vertical-align: top; }
+    .doc-header { background: #CBD5E1; font-weight: bold; text-align: center; text-transform: uppercase; padding: 8px; font-size: 14px; border: 1px solid #000; margin-top: 20px; margin-bottom: 0px; color: #000; }
+    .sub-header { background: #F1F5F9; font-weight: bold; padding: 6px 10px; font-size: 12px; border: 1px solid #000; color: #000; }
+    .qr-box { border: 1px solid #000; padding: 5px; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-align: center; color: #000; margin-left: 20px;}
+    
+    .status-pass { color: #166534; font-weight: bold; }
+    .status-fail { color: #991B1B; font-weight: bold; }
+    .status-na { color: #475569; }
+    
+    .signature-block { color: #1D4ED8; font-family: cursive; font-size: 15px; display: block; margin-top: 5px; }
+
+    @media print {
+      body { background: #FFF !important; padding: 0 !important; color: #000 !important; }
+      .d-print-none { display: none !important; }
+      .permit-document-sheet { border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar Controls -->
+  <header class="vg-header d-print-none" style="padding: 15px 40px; background: rgba(15,22,41,0.95); border-bottom: 1px solid var(--vg-border);">
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <i class='bx bx-check-shield' style="font-size: 28px; color: var(--vg-accent-primary);"></i>
+        <h2 style="margin: 0; font-family: var(--font-outfit); font-weight: 700;">Official Permit Viewer</h2>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button type="button" class="vg-btn vg-btn-primary" onclick="window.print()">
+          <i class='bx bx-printer'></i> Print PDF
+        </button>
+        <button type="button" onclick="window.history.back();" class="vg-btn vg-btn-secondary">
+          <i class='bx bx-arrow-back'></i> Return to Dashboard
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Document Sheet Container -->
+  <main style="padding: 40px 20px;">
+    
+    <div class="permit-document-sheet" id="print-area">
+      
+      <!-- Header Area -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
+        <div>
+          <h2 style="font-weight: 900; margin: 0 0 5px 0; color: #000; letter-spacing: 0.5px;" id="permit-main-title">GENERAL SAFETY & HAZARDOUS WORK PERMIT</h2>
+          <div style="font-size: 12px; color: #333; margin-bottom: 2px;">Document Reference: <strong>AIL-CS/AMS/MFG/JM/TPL/PMT/03/00 Rev 05</strong></div>
+          <div style="font-size: 12px; color: #333;">Plant Site: <strong>VisionGuard Manufacturing Facility (Unit 01)</strong></div>
+        </div>
+        <div style="display: flex; align-items: flex-start;">
+          <div style="text-align: right;">
+            <div style="font-weight: 900; color: #DC2626; font-size: 22px;" id="permit-serial">PTW-20260822-5501</div>
+            <div style="margin-top: 5px;"><span style="border: 1px solid #166534; color: #166534; padding: 3px 8px; font-weight: bold; font-size: 11px;">STATUS: APPROVED / ACTIVE</span></div>
+          </div>
+          <div class="qr-box">DIGITAL<br/>QR<br/>VERIFIED</div>
+        </div>
+      </div>
+
+      <!-- SECTION A -->
+      <div class="doc-header">SECTION A: GENERAL WORK DETAILS & SCOPE</div>
+      <table>
+        <tr>
+          <td style="width: 25%;"><strong>Job Category:</strong></td>
+          <td style="width: 25%;">Cold Work & Confined Space</td>
+          <td style="width: 25%;"><strong>Permit Issue Date:</strong></td>
+          <td style="width: 25%;">2026-08-22</td>
+        </tr>
+        <tr>
+          <td><strong>From Department:</strong></td>
+          <td>Operations</td>
+          <td><strong>To Department:</strong></td>
+          <td>Maintenance / Contractor</td>
+        </tr>
+        <tr>
+          <td><strong>Valid From (Time):</strong></td>
+          <td>08:00 AM</td>
+          <td><strong>Valid To (Time):</strong></td>
+          <td>18:00 PM</td>
+        </tr>
+        <tr>
+          <td><strong>Plant / Section:</strong></td>
+          <td>Zone 12 - Reactor Tank Farm</td>
+          <td><strong>Equipment / Tag No:</strong></td>
+          <td>Reactor Vessel V-101</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <strong>Detailed Scope of Work:</strong><br/>
+            Internal steam cleaning, chemical residue removal, manual scraping, and ultrasonic wall thickness inspection. Requires full confined space entry protocol and electrical isolation of agitator motor.
+          </td>
+        </tr>
+      </table>
+
+      <!-- SECTION B -->
+      <div class="doc-header">SECTION B: ELECTRICAL ISOLATION & LOTO (LOCK-OUT / TAG-OUT)</div>
+      <table>
+        <tr>
+          <td colspan="4" class="sub-header">ELECTRICAL CLEARANCE (Filled by Electrical Dept)</td>
+        </tr>
+        <tr>
+          <td style="width: 5%;"><strong>1.</strong></td>
+          <td style="width: 55%;">Equipment electrically isolated from main MCC/Substation?</td>
+          <td style="width: 15%; text-align: center;"><span class="status-pass">YES</span></td>
+          <td style="width: 25%;"><strong>Substation:</strong> SS-04, Panel 12A</td>
+        </tr>
+        <tr>
+          <td><strong>2.</strong></td>
+          <td>Fuses removed / Rack-out condition verified?</td>
+          <td style="text-align: center;"><span class="status-pass">YES</span></td>
+          <td><strong>Tag No:</strong> LOTO-9921</td>
+        </tr>
+        <tr>
+          <td><strong>3.</strong></td>
+          <td>Local Push Button Station (LPBS) locked and tagged out?</td>
+          <td style="text-align: center;"><span class="status-pass">YES</span></td>
+          <td><strong>Lock No:</strong> L-1055</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="background: #F8FAFC;">
+            <strong>Electrical Department Authorization:</strong><br/>
+            <span class="signature-block">Digitally Signed by: V. K. Singh (Sr. Electrical Engineer) at 07:45 AM</span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- SECTION C -->
+      <div class="doc-header">SECTION C: PROCESS & MECHANICAL ISOLATION</div>
+      <table>
+        <tr>
+          <th style="width: 5%;">Sr</th>
+          <th style="width: 65%;">Isolation Requirement</th>
+          <th style="width: 15%;">Required?</th>
+          <th style="width: 15%;">Verified By</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>All connecting product lines depressurized, drained, and flushed.</td>
+          <td class="status-pass" style="text-align:center;">YES</td>
+          <td>Operations</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Positive isolation achieved by inserting blind/spade (Slip Blind installed).</td>
+          <td class="status-pass" style="text-align:center;">YES</td>
+          <td>Maintenance</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Vessel purged with Nitrogen/Steam and followed by forced air ventilation.</td>
+          <td class="status-pass" style="text-align:center;">YES</td>
+          <td>Operations</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Manhole covers kept fully open for cross ventilation.</td>
+          <td class="status-pass" style="text-align:center;">YES</td>
+          <td>Operations</td>
+        </tr>
+      </table>
+
+      <!-- SECTION D -->
+      <div class="doc-header">SECTION D: ATMOSPHERIC GAS TESTING LOG (OISD-105 COMPLIANT)</div>
+      <table>
+        <tr style="background: #f1f5f9;">
+          <th>Parameter Tested</th>
+          <th>Permissible Limits</th>
+          <th>Test Result 1 (08:00 AM)</th>
+          <th>Test Result 2 (12:00 PM)</th>
+          <th>Status</th>
+        </tr>
+        <tr>
+          <td>Oxygen ($O_2$) Content</td>
+          <td>19.5% - 23.5%</td>
+          <td><strong>20.9%</strong></td>
+          <td><strong>20.8%</strong></td>
+          <td class="status-pass">SAFE</td>
+        </tr>
+        <tr>
+          <td>Combustible Gas (LEL)</td>
+          <td>0% LEL</td>
+          <td><strong>0.0%</strong></td>
+          <td><strong>0.0%</strong></td>
+          <td class="status-pass">SAFE</td>
+        </tr>
+        <tr>
+          <td>Toxic Gas ($H_2S$)</td>
+          <td>< 5 PPM</td>
+          <td><strong>0 PPM</strong></td>
+          <td><strong>0 PPM</strong></td>
+          <td class="status-pass">SAFE</td>
+        </tr>
+        <tr>
+          <td>Toxic Gas (Carbon Monoxide)</td>
+          <td>< 25 PPM</td>
+          <td><strong>0 PPM</strong></td>
+          <td><strong>0 PPM</strong></td>
+          <td class="status-pass">SAFE</td>
+        </tr>
+      </table>
+
+      <!-- SECTION E -->
+      <div class="doc-header">SECTION E: REQUIRED PERSONAL PROTECTIVE EQUIPMENT (PPE)</div>
+      <table>
+        <tr>
+          <td style="width: 25%;"><input type="checkbox" checked disabled> Safety Helmet</td>
+          <td style="width: 25%;"><input type="checkbox" checked disabled> Safety Shoes</td>
+          <td style="width: 25%;"><input type="checkbox" checked disabled> Safety Goggles</td>
+          <td style="width: 25%;"><input type="checkbox" checked disabled> Hand Gloves (Chemical)</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" checked disabled> Full Body Harness</td>
+          <td><input type="checkbox" checked disabled> Multi-Gas Detector</td>
+          <td><input type="checkbox" disabled> SCBA Set (Standby)</td>
+          <td><input type="checkbox" disabled> Ear Plugs / Muffs</td>
+        </tr>
+      </table>
+
+      <!-- SECTION F -->
+      <div class="doc-header">SECTION F: MULTI-LEVEL DIGITAL SIGNATURES & FINAL APPROVAL</div>
+      <table>
+        <tr style="background: #f1f5f9;">
+          <th style="width: 25%;">Role</th>
+          <th style="width: 30%;">Name & Designation</th>
+          <th style="width: 30%;">Digital Signature Stamp</th>
+          <th style="width: 15%;">Date & Time</th>
+        </tr>
+        <tr>
+          <td><strong>1. Job Initiator (Contractor/Maint)</strong></td>
+          <td>Deepak Kumar (Supervisor)</td>
+          <td><span class="signature-block">[Signature Validated]</span></td>
+          <td>08:15 AM</td>
+        </tr>
+        <tr>
+          <td><strong>2. Area Operations In-Charge</strong></td>
+          <td>Manoj Tiwari (Shift In-Charge)</td>
+          <td><span class="signature-block">[Clearance Issued]</span></td>
+          <td>08:20 AM</td>
+        </tr>
+        <tr>
+          <td><strong>3. Safety Officer (Testing)</strong></td>
+          <td>R. Sharma (Safety Lead)</td>
+          <td><span class="signature-block">[Gas Tests Passed & Verified]</span></td>
+          <td>08:30 AM</td>
+        </tr>
+        <tr>
+          <td><strong>4. Final Approval (Executive/HOD)</strong></td>
+          <td>Abhishek Sharan (Manager)</td>
+          <td><span class="signature-block" style="color: #166534;">[Final Permit Approved]</span></td>
+          <td>08:45 AM</td>
+        </tr>
+      </table>
+
+      <div style="margin-top: 15px; font-size: 11px; text-align: center; color: #555; border-top: 1px dashed #ccc; padding-top: 10px;">
+        * This document is generated automatically by the VisionGuard Enterprise Safety System. All digital signatures conform to IT Act 2000 regulations.<br/>
+        Valid only for the specified date and time. Any deviation in plant conditions requires immediate halt of work and re-validation.
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Extract query param to update title dynamically
+    const urlParams = new URLSearchParams(window.location.search);
+    const permitId = urlParams.get('id');
+    if (permitId) {
+      document.getElementById('permit-serial').innerText = permitId;
+      document.title = permitId + " | VisionGuard Permit";
+    }
+  </script>
+</body>
+</html>
