@@ -33,5 +33,12 @@
         "password": "pass",
         "role": "Worker",
         "name": "Site Worker"
+    },
+    {
+        "id": "6a8a980de41df",
+        "email": "abhisheksharmaarts@gmail.com",
+        "password": "abhishek8055",
+        "role": "Admin",
+        "name": "abhishek"
     }
 ]

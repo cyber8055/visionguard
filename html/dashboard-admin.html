@@ -22,6 +22,9 @@
     }
     .admin-form-group input:focus, .admin-form-group select:focus {
       border-color: var(--vg-accent-primary);
+    .admin-form-group select option {
+      background: var(--vg-bg-surface);
+      color: var(--vg-text-primary);
     }
     
     .modal-overlay {
@@ -47,6 +50,9 @@
         </a>
       </div>
       <div style="display: flex; align-items: center; gap: 16px;">
+        <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
+          <i class='bx bx-arrow-back'></i>
+        </button>
         <div class="vg-header-title">
           <h2 id="main-header-title">System Administration</h2>
         </div>
@@ -57,11 +63,11 @@
       <!-- Sidebar -->
       <aside class="vg-sidebar">
         <nav class="vg-sidebar-nav" style="margin-top: 12px;">
-          <a href="javascript:void(0)" class="vg-nav-link active" title="User Management">
+          <a href="javascript:void(0)" onclick="switchAdminView('user-management', this)" class="vg-nav-link active" title="User Management">
             <i class='bx bx-group'></i> <span class="vg-nav-link-text">User Management</span>
           </a>
-          <a href="javascript:void(0)" class="vg-nav-link" title="System Logs" style="opacity: 0.5;">
-            <i class='bx bx-server'></i> <span class="vg-nav-link-text">System Logs</span>
+          <a href="javascript:void(0)" onclick="switchAdminView('system-logs', this)" class="vg-nav-link" title="System Logs">
+            <i class='bx bx-list-ol'></i> <span class="vg-nav-link-text">System Logs</span>
           </a>
         </nav>
 
@@ -79,29 +85,91 @@
       <!-- Main Area -->
       <main class="vg-content-area">
         
-        <div class="vg-card" style="padding: 0; overflow: hidden;">
-          <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
-            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
-              <i class='bx bx-shield-quarter' style="color: var(--vg-accent-primary);"></i> User Access & Credentials
-            </h3>
-            <button onclick="openUserModal()" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-plus'></i> Add New User</button>
-          </div>
+        <!-- USER MANAGEMENT VIEW -->
+        <div id="user-management-view" class="admin-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
+                <i class='bx bx-shield-quarter' style="color: var(--vg-accent-primary);"></i> User Access & Credentials
+              </h3>
+              <button onclick="openUserModal()" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-plus'></i> Add New User</button>
+            </div>
 
-          <div class="vg-table-wrapper">
-            <table class="vg-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Work Email</th>
-                  <th>Role Definition</th>
-                  <th>Password</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="users-tbody">
-                <tr><td colspan="5" style="text-align: center;">Loading users...</td></tr>
-              </tbody>
-            </table>
+            <!-- Filters & Search -->
+            <div style="padding: 16px 24px; background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--vg-border); display: flex; gap: 16px; align-items: center;">
+              <div style="flex: 1; position: relative;">
+                <i class='bx bx-search' style="position: absolute; left: 12px; top: 9px; color: var(--vg-text-muted); font-size: 18px;"></i>
+                <input type="text" id="searchUser" onkeyup="filterUsers()" placeholder="Search users by name or email..." style="width: 100%; padding: 8px 12px 8px 36px; background: var(--vg-bg-main); border: 1px solid var(--vg-border); border-radius: 6px; color: var(--vg-text-primary); outline: none;">
+              </div>
+              <select id="filterRole" onchange="filterUsers()" style="padding: 8px 12px; background: var(--vg-bg-main); border: 1px solid var(--vg-border); border-radius: 6px; color: var(--vg-text-primary); outline: none;">
+                <option value="">All Roles</option>
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Safety Officer">Safety Officer</option>
+                <option value="Worker">Worker</option>
+              </select>
+            </div>
+
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Work Email</th>
+                    <th>Role Definition</th>
+                    <th>Password</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody">
+                  <tr><td colspan="5" style="text-align: center;">Loading users...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SYSTEM LOGS VIEW -->
+        <div id="system-logs-view" class="admin-view" style="display: none;">
+          <div class="vg-card">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 16px;">
+              <i class='bx bx-list-ol' style="color: var(--vg-accent-primary);"></i> System Audit Logs
+            </h3>
+            <p style="color: var(--vg-text-secondary); margin-bottom: 24px;">This section is designed to track security events such as login attempts, password changes, and user modifications. (Feature pending integration).</p>
+            
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>User / IP</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Just now</td>
+                    <td>Admin logged in</td>
+                    <td>admin@visionguard.local</td>
+                    <td><span class="vg-badge vg-badge-success">Success</span></td>
+                  </tr>
+                  <tr>
+                    <td>10 mins ago</td>
+                    <td>Password reset attempt</td>
+                    <td>supervisor@visionguard.local</td>
+                    <td><span class="vg-badge vg-badge-success">Success</span></td>
+                  </tr>
+                  <tr>
+                    <td>1 hour ago</td>
+                    <td>Failed login</td>
+                    <td>unknown</td>
+                    <td><span class="vg-badge vg-badge-danger">Failed</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -127,7 +195,7 @@
         
         <div class="admin-form-group">
           <label>Work Email</label>
-          <input type="email" id="userEmail" required placeholder="name@visionguard.local" />
+          <input type="email" id="userEmail" required placeholder="name@visionguard.local" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" oninvalid="this.setCustomValidity('Please enter a valid email address containing @ and a domain (e.g. .com)')" oninput="this.setCustomValidity('')" />
         </div>
         
         <div class="admin-form-group">
@@ -159,6 +227,14 @@
       document.querySelector('.vg-sidebar').classList.toggle('collapsed');
     }
 
+    function switchAdminView(viewId, element) {
+      document.querySelectorAll('.admin-view').forEach(el => el.style.display = 'none');
+      document.getElementById(viewId).style.display = 'block';
+      
+      document.querySelectorAll('.vg-sidebar-nav .vg-nav-link').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+    }
+
     let allUsers = [];
 
     async function fetchUsers() {
@@ -167,22 +243,35 @@
         const data = await res.json();
         if(data.success) {
           allUsers = data.data;
-          renderUsers();
+          renderUsers(allUsers);
         }
       } catch (err) {
         console.error(err);
       }
     }
 
-    function renderUsers() {
+    function filterUsers() {
+      const searchTerm = document.getElementById('searchUser').value.toLowerCase();
+      const roleFilter = document.getElementById('filterRole').value;
+
+      const filtered = allUsers.filter(u => {
+        const matchesSearch = u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
+        const matchesRole = roleFilter === "" || u.role === roleFilter;
+        return matchesSearch && matchesRole;
+      });
+
+      renderUsers(filtered);
+    }
+
+    function renderUsers(usersToRender) {
       const tbody = document.getElementById('users-tbody');
-      if(allUsers.length === 0) {
+      if(usersToRender.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No users found.</td></tr>';
         return;
       }
 
       let html = '';
-      allUsers.forEach(u => {
+      usersToRender.forEach(u => {
         let roleBadge = '';
         if(u.role === 'Admin') roleBadge = '<span class="vg-badge vg-badge-danger">Admin</span>';
         else if(u.role === 'Manager') roleBadge = '<span class="vg-badge vg-badge-accent">Manager</span>';
