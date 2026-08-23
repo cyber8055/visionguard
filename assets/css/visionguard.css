@@ -62,8 +62,14 @@ body {
 /* App Shell Structure */
 .vg-app-shell {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: var(--vg-bg-main);
+}
+
+.vg-app-body {
+  display: flex;
+  flex: 1;
 }
 
 /* Sidebar Navigation */
@@ -75,8 +81,8 @@ body {
   flex-direction: column;
   flex-shrink: 0;
   position: sticky;
-  top: 0;
-  height: 100vh;
+  top: 70px;
+  height: calc(100vh - 70px);
   z-index: 50;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
@@ -87,38 +93,7 @@ body {
   width: 76px;
 }
 
-.vg-sidebar-brand {
-  height: 70px;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--vg-border);
-  box-sizing: border-box;
-}
-.vg-sidebar.collapsed .vg-sidebar-brand {
-  justify-content: center;
-  padding: 0;
-}
 
-.vg-sidebar-brand img {
-  height: 32px;
-  width: auto;
-}
-
-.vg-sidebar-brand span.brand-title-text {
-  font-family: var(--font-outfit);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--vg-text-primary);
-  transition: opacity 0.2s;
-}
-
-.vg-sidebar.collapsed .brand-text-container {
-  opacity: 0;
-  display: none;
-}
 
 .vg-sidebar-nav {
   padding: 16px 12px;
@@ -209,26 +184,54 @@ body {
   color: var(--vg-text-muted);
 }
 
-/* Header Topbar */
+/* Global Header Topbar */
 .vg-header {
   height: 70px;
-  background: rgba(17, 24, 39, 0.85);
+  background: rgba(17, 24, 39, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--vg-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 24px;
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 60;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vg-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vg-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.vg-header-brand i {
+  font-size: 26px;
+  color: var(--vg-accent-primary);
+}
+.vg-header-brand span {
+  font-family: var(--font-outfit);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--vg-text-primary);
 }
 
 .vg-header-title h2 {
   font-family: var(--font-outfit);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  margin: 0;
+  color: var(--vg-text-secondary);
 }
 
 .vg-status-indicator {

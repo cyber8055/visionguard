@@ -121,54 +121,52 @@
 
   <div class="vg-app-shell">
     
-    <!-- Sidebar -->
-    <aside class="vg-sidebar">
-      <div class="vg-sidebar-brand">
-        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0; background: transparent; border: none; font-size: 22px; color: var(--vg-text-primary); flex-shrink: 0;" title="Toggle Menu">
+    <!-- Global Header -->
+    <header class="vg-header">
+      <div class="vg-header-left">
+        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 38px; height: 38px; padding: 0; background: transparent; border: none; font-size: 24px; color: var(--vg-text-primary);" title="Toggle Menu">
           <i class='bx bx-menu'></i>
         </button>
-        <span class="brand-text-container" style="display: flex; align-items: center; gap: 8px;">
-          <i class='bx bx-check-shield' style="font-size: 24px; color: var(--vg-accent-primary);"></i>
-          <span class="brand-title-text">VisionGuard</span>
-        </span>
+        <a href="dashboard-manager.html" class="vg-header-brand">
+          <i class='bx bx-check-shield'></i>
+          <span>VisionGuard</span>
+        </a>
       </div>
-
-      <nav class="vg-sidebar-nav">
-        <a href="javascript:void(0)" onclick="switchView('executive-queue-view', this)" class="vg-nav-link active" title="Executive Queue">
-          <i class='bx bx-crown'></i> <span class="vg-nav-link-text">Executive Queue</span>
-        </a>
-        <a href="javascript:void(0)" onclick="switchView('active-permits-view', this)" class="vg-nav-link" title="Active Permits">
-          <i class='bx bx-file'></i> <span class="vg-nav-link-text">Active Permits</span>
-        </a>
-        <a href="javascript:void(0)" onclick="switchView('permit-history-view', this)" class="vg-nav-link" title="Permit History">
-          <i class='bx bx-history'></i> <span class="vg-nav-link-text">Permit History</span>
-        </a>
-      </nav>
-
-      <div class="vg-sidebar-user">
-        <div class="vg-user-info">
-          <h5>Executive Manager</h5>
-          <p>HOD Approver</p>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="vg-header-title">
+          <h2 id="main-header-title">Manager Approval Center</h2>
         </div>
-        <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
-          <i class='bx bx-log-out'></i>
-        </a>
+        <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
+          <i class='bx bx-arrow-back'></i>
+        </button>
       </div>
-    </aside>
+    </header>
 
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      
-      <!-- Topbar Header -->
-      <header class="vg-header">
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
-            <i class='bx bx-arrow-back'></i>
-          </button>
-          <div class="vg-header-title">
-            <h2 id="main-header-title">Manager Approval Center</h2>
+    <div class="vg-app-body">
+      <!-- Sidebar -->
+      <aside class="vg-sidebar">
+        <nav class="vg-sidebar-nav" style="margin-top: 12px;">
+          <a href="javascript:void(0)" onclick="switchView('executive-queue-view', this)" class="vg-nav-link active" title="Executive Queue">
+            <i class='bx bx-crown'></i> <span class="vg-nav-link-text">Executive Queue</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('active-permits-view', this)" class="vg-nav-link" title="Active Permits">
+            <i class='bx bx-file'></i> <span class="vg-nav-link-text">Active Permits</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('permit-history-view', this)" class="vg-nav-link" title="Permit History">
+            <i class='bx bx-history'></i> <span class="vg-nav-link-text">Permit History</span>
+          </a>
+        </nav>
+
+        <div class="vg-sidebar-user">
+          <div class="vg-user-info">
+            <h5>Executive Manager</h5>
+            <p>HOD Approver</p>
           </div>
+          <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
+            <i class='bx bx-log-out'></i>
+          </a>
         </div>
-      </header>
+      </aside>
 
       <!-- Main Area -->
       <main class="vg-content-area">
