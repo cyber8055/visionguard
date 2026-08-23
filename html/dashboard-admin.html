@@ -155,8 +155,8 @@
                     <th>Last Active</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr onclick="alert('Demo: Showing history for System Administrator\n- Logged in: Today at 09:00 AM\n- Password changed: Yesterday\n- Logged out: Today at 05:00 PM')">
+                <tbody id="logs-tbody">
+                  <tr onclick="toggleHistory('history-1')" style="transition: background 0.2s;">
                     <td>
                       <strong>System Administrator</strong><br>
                       <small style="color: var(--vg-text-muted);">admin@visionguard.local</small>
@@ -165,7 +165,64 @@
                     <td><span class="vg-badge vg-badge-success" style="background: rgba(16, 185, 129, 0.15); color: #10b981;"><span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px;"></span>Active Now</span></td>
                     <td style="color: var(--vg-text-muted);">Just now</td>
                   </tr>
-                  <tr onclick="alert('Demo: Showing history for Field Supervisor\n- Logged in: Today at 08:30 AM\n- Action: Approved Hot Work Permit\n- Logged out: Today at 04:30 PM')">
+                  <tr id="history-1" class="history-row" style="display: none; background: rgba(0,0,0,0.15);">
+                    <td colspan="4" style="padding: 0;">
+                      <div style="padding: 24px; margin: 12px 24px; background: var(--vg-bg-main); border-radius: 8px; border: 1px solid var(--vg-border);">
+                        <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                          <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
+                        </h4>
+                        
+                        <div style="position: relative; padding-left: 16px;">
+                          <!-- Vertical line -->
+                          <div style="position: absolute; left: 3px; top: 6px; bottom: 6px; width: 2px; background: var(--vg-border);"></div>
+                          
+                          <!-- Timeline Item 1 -->
+                          <div style="position: relative; margin-bottom: 20px;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-status-success); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Active Session Ongoing</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">Viewing User Management Dashboard</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Today, 12:35 PM<br>IP: 192.168.1.105
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Timeline Item 2 -->
+                          <div style="position: relative; margin-bottom: 20px;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-accent-primary); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Password Updated</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">User changed their password via Admin Panel</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Yesterday, 10:15 AM<br>IP: 192.168.1.105
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Timeline Item 3 -->
+                          <div style="position: relative;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-text-muted); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Logged Out</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">Manual logout</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Aug 21, 05:00 PM<br>IP: 192.168.1.105
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr onclick="toggleHistory('history-2')" style="transition: background 0.2s;">
                     <td>
                       <strong>Field Supervisor</strong><br>
                       <small style="color: var(--vg-text-muted);">supervisor@visionguard.local</small>
@@ -173,6 +230,61 @@
                     <td><span class="vg-badge vg-badge-info">Supervisor</span></td>
                     <td><span class="vg-badge" style="background: rgba(255, 255, 255, 0.05); color: var(--vg-text-muted);">Offline</span></td>
                     <td style="color: var(--vg-text-muted);">2 hours ago</td>
+                  </tr>
+                  <tr id="history-2" class="history-row" style="display: none; background: rgba(0,0,0,0.15);">
+                    <td colspan="4" style="padding: 0;">
+                      <div style="padding: 24px; margin: 12px 24px; background: var(--vg-bg-main); border-radius: 8px; border: 1px solid var(--vg-border);">
+                        <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                          <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
+                        </h4>
+                        
+                        <div style="position: relative; padding-left: 16px;">
+                          <div style="position: absolute; left: 3px; top: 6px; bottom: 6px; width: 2px; background: var(--vg-border);"></div>
+                          
+                          <!-- Timeline Item 1 -->
+                          <div style="position: relative; margin-bottom: 20px;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-text-muted); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Session Terminated</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">User logged out</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Today, 10:30 AM<br>IP: 10.0.4.55
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Timeline Item 2 -->
+                          <div style="position: relative; margin-bottom: 20px;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-status-warning); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Approved Hot Work Permit</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">Permit #HW-4092 Approved for Site B</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Today, 09:15 AM<br>IP: 10.0.4.55
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Timeline Item 3 -->
+                          <div style="position: relative;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-status-info); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Logged In</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">OTP Verified Successfully</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Today, 08:30 AM<br>IP: 10.0.4.55
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -240,6 +352,17 @@
       
       document.querySelectorAll('.vg-sidebar-nav .vg-nav-link').forEach(el => el.classList.remove('active'));
       element.classList.add('active');
+    }
+
+    function toggleHistory(id) {
+      const row = document.getElementById(id);
+      if (row.style.display === 'none') {
+        // Hide all other history rows first
+        document.querySelectorAll('.history-row').forEach(r => r.style.display = 'none');
+        row.style.display = 'table-row';
+      } else {
+        row.style.display = 'none';
+      }
     }
 
     let allUsers = [];
