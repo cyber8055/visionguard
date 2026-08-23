@@ -366,6 +366,15 @@
         if (e.key === 'Backspace' && !e.target.value && index > 0) inputs[index - 1].focus();
       });
     });
+
+    // Reset state on back navigation
+    window.addEventListener('pageshow', function(event) {
+      const btn = document.getElementById('btn-login');
+      if (btn) btn.innerHTML = "<i class='bx bx-log-in-circle'></i> Sign in";
+      
+      const form = document.getElementById('formAuthentication');
+      if (form) form.reset();
+    });
   </script>
 </body>
 </html>
