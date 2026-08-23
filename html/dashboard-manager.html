@@ -124,8 +124,13 @@
     <!-- Sidebar -->
     <aside class="vg-sidebar">
       <div class="vg-sidebar-brand">
-        <i class='bx bx-check-shield' style="font-size: 28px; color: var(--vg-accent-primary);"></i>
-        <span>VisionGuard</span>
+        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0; background: transparent; border: none; font-size: 22px; color: var(--vg-text-primary); flex-shrink: 0;" title="Toggle Menu">
+          <i class='bx bx-menu'></i>
+        </button>
+        <span class="brand-text-container" style="display: flex; align-items: center; gap: 8px;">
+          <i class='bx bx-check-shield' style="font-size: 24px; color: var(--vg-accent-primary);"></i>
+          <span class="brand-title-text">VisionGuard</span>
+        </span>
       </div>
 
       <nav class="vg-sidebar-nav">
@@ -156,9 +161,6 @@
       <!-- Topbar Header -->
       <header class="vg-header">
         <div style="display: flex; align-items: center; gap: 16px;">
-          <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Toggle Menu">
-            <i class='bx bx-menu'></i>
-          </button>
           <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
             <i class='bx bx-arrow-back'></i>
           </button>

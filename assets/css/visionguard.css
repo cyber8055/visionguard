@@ -88,15 +88,17 @@ body {
 }
 
 .vg-sidebar-brand {
-  padding: 24px;
+  height: 70px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid var(--vg-border);
+  box-sizing: border-box;
 }
 .vg-sidebar.collapsed .vg-sidebar-brand {
   justify-content: center;
-  padding: 24px 0;
+  padding: 0;
 }
 
 .vg-sidebar-brand img {
@@ -104,7 +106,7 @@ body {
   width: auto;
 }
 
-.vg-sidebar-brand span {
+.vg-sidebar-brand span.brand-title-text {
   font-family: var(--font-outfit);
   font-size: 20px;
   font-weight: 800;
@@ -112,7 +114,8 @@ body {
   color: var(--vg-text-primary);
   transition: opacity 0.2s;
 }
-.vg-sidebar.collapsed .vg-sidebar-brand span {
+
+.vg-sidebar.collapsed .brand-text-container {
   opacity: 0;
   display: none;
 }
