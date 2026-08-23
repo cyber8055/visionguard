@@ -177,8 +177,8 @@
                           <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin: 0; display: flex; align-items: center; gap: 8px;">
                             <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
                           </h4>
-                          <button onclick="downloadHistoryCSV('System Administrator')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 12px; font-size: 12px; border-color: rgba(255,255,255,0.1);">
-                            <i class='bx bx-download'></i> Download Report (.csv)
+                          <button onclick="downloadHistoryExcel('System Administrator')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 12px; font-size: 12px; border-color: rgba(255,255,255,0.1);">
+                            <i class='bx bx-download'></i> Download Report (.xls)
                           </button>
                         </div>
                         
@@ -274,8 +274,8 @@
                           <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin: 0; display: flex; align-items: center; gap: 8px;">
                             <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
                           </h4>
-                          <button onclick="downloadHistoryCSV('Field Supervisor')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 12px; font-size: 12px; border-color: rgba(255,255,255,0.1);">
-                            <i class='bx bx-download'></i> Download Report (.csv)
+                          <button onclick="downloadHistoryExcel('Field Supervisor')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 12px; font-size: 12px; border-color: rgba(255,255,255,0.1);">
+                            <i class='bx bx-download'></i> Download Report (.xls)
                           </button>
                         </div>
                         
@@ -420,27 +420,52 @@
       }
     }
 
-    function downloadHistoryCSV(userName) {
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Timestamp,User,Action,IP Address\r\n";
-      
+    function downloadHistoryExcel(userName) {
+      let tableRows = '';
       if (userName.includes('Admin')) {
-        csvContent += "Today 12:35 PM,System Administrator,Active Session Ongoing (Viewing User Management Dashboard),192.168.1.105\r\n";
-        csvContent += "Yesterday 10:15 AM,System Administrator,Password Updated (User changed their password via Admin Panel),192.168.1.105\r\n";
-        csvContent += "Aug 21 05:00 PM,System Administrator,Logged Out (Manual logout),192.168.1.105\r\n";
-        csvContent += "Aug 21 09:00 AM,System Administrator,Logged In (System authentication),192.168.1.105\r\n";
-        csvContent += "Aug 20 11:30 AM,System Administrator,Deleted User (Removed account for old_worker@visionguard.local),192.168.1.105\r\n";
+        tableRows += `<tr><td>Today 12:35 PM</td><td>System Administrator</td><td>Active Session Ongoing (Viewing User Management Dashboard)</td><td>192.168.1.105</td></tr>`;
+        tableRows += `<tr><td>Yesterday 10:15 AM</td><td>System Administrator</td><td>Password Updated (User changed their password via Admin Panel)</td><td>192.168.1.105</td></tr>`;
+        tableRows += `<tr><td>Aug 21 05:00 PM</td><td>System Administrator</td><td>Logged Out (Manual logout)</td><td>192.168.1.105</td></tr>`;
+        tableRows += `<tr><td>Aug 21 09:00 AM</td><td>System Administrator</td><td>Logged In (System authentication)</td><td>192.168.1.105</td></tr>`;
+        tableRows += `<tr><td>Aug 20 11:30 AM</td><td>System Administrator</td><td>Deleted User (Removed account for old_worker@visionguard.local)</td><td>192.168.1.105</td></tr>`;
       } else {
-        csvContent += "Today 10:30 AM,Field Supervisor,Session Terminated (User logged out),10.0.4.55\r\n";
-        csvContent += "Today 09:15 AM,Field Supervisor,Approved Hot Work Permit (Permit #HW-4092 Approved for Site B),10.0.4.55\r\n";
-        csvContent += "Today 08:30 AM,Field Supervisor,Logged In (OTP Verified Successfully),10.0.4.55\r\n";
-        csvContent += "Yesterday 04:30 PM,Field Supervisor,Session Terminated (User logged out),10.0.4.55\r\n";
+        tableRows += `<tr><td>Today 10:30 AM</td><td>Field Supervisor</td><td>Session Terminated (User logged out)</td><td>10.0.4.55</td></tr>`;
+        tableRows += `<tr><td>Today 09:15 AM</td><td>Field Supervisor</td><td>Approved Hot Work Permit (Permit #HW-4092 Approved for Site B)</td><td>10.0.4.55</td></tr>`;
+        tableRows += `<tr><td>Today 08:30 AM</td><td>Field Supervisor</td><td>Logged In (OTP Verified Successfully)</td><td>10.0.4.55</td></tr>`;
+        tableRows += `<tr><td>Yesterday 04:30 PM</td><td>Field Supervisor</td><td>Session Terminated (User logged out)</td><td>10.0.4.55</td></tr>`;
       }
+
+      let template = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+        <meta charset="utf-8">
+        <style>
+          table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
+          th { background-color: #1e293b; color: #ffffff; font-weight: bold; padding: 12px; text-align: left; border: 1px solid #cbd5e1; }
+          td { padding: 10px; border: 1px solid #cbd5e1; color: #333333; }
+          .header-row { height: 40px; }
+        </style>
+        </head>
+        <body>
+          <h2 style="font-family: Arial, sans-serif; color: #0f172a;">Session Activity Report: ${userName}</h2>
+          <p style="font-family: Arial, sans-serif; color: #64748b;">Generated on: ${new Date().toLocaleString()}</p>
+          <table>
+            <tr class="header-row">
+              <th style="width: 150px;">Timestamp</th>
+              <th style="width: 180px;">User</th>
+              <th style="width: 350px;">Action</th>
+              <th style="width: 150px;">IP Address</th>
+            </tr>
+            ${tableRows}
+          </table>
+        </body>
+        </html>
+      `;
       
-      const encodedUri = encodeURI(csvContent);
+      const blob = new Blob([template], { type: 'application/vnd.ms-excel' });
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${userName.replace(/ /g, '_')}_Activity_Log.csv`);
+      link.href = URL.createObjectURL(blob);
+      link.download = `${userName.replace(/ /g, '_')}_Activity_Log.xls`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
