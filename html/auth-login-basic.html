@@ -442,7 +442,11 @@
             <input type="text" maxlength="1" class="otp-box" required />
           </div>
           <button type="submit" class="btn btn-primary" id="btn-verify"><i class='bx bx-check-shield'></i> Verify OTP</button>
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('step-login').style.display='block'; document.getElementById('step-otp').style.display='none';"><i class='bx bx-left-arrow-alt'></i> Return to Login</button>
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <button type="button" class="btn btn-secondary" onclick="resendOtp()" id="btn-resend" style="flex: 1; margin-bottom: 0;"><i class='bx bx-refresh'></i> Resend OTP</button>
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('step-login').style.display='block'; document.getElementById('step-otp').style.display='none';" style="flex: 1; margin-bottom: 0;"><i class='bx bx-left-arrow-alt'></i> Back</button>
+          </div>
         </form>
       </div>
 
@@ -605,6 +609,31 @@
         otpEmailInput.value = '';
         showAlert('alert-otp', 'Please enter your email to receive an OTP.', 'success');
       }
+    }
+
+    async function resendOtp() {
+      const emailInput = document.getElementById('otp-email').value;
+      if (!emailInput) return;
+      
+      const btn = document.getElementById('btn-resend');
+      btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
+      btn.disabled = true;
+
+      try {
+        await fetch('../php/send-otp.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailInput })
+        });
+        showAlert('alert-otp', 'A new OTP has been sent to your email.', 'success');
+      } catch (err) {
+        showAlert('alert-otp', 'Failed to resend OTP.');
+      }
+      
+      setTimeout(() => {
+        btn.innerHTML = "<i class='bx bx-refresh'></i> Resend OTP";
+        btn.disabled = false;
+      }, 5000); // 5 sec cooldown
     }
 
     async function handleVerifyOtp(e) {
