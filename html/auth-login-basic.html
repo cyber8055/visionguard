@@ -234,21 +234,36 @@
           <label class="form-label" for="email">Work Email</label>
           <input type="email" class="form-control" id="email" placeholder="agent@visionguard.local" required autofocus />
 
-          <label class="form-label" for="password">Password</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+            <a href="javascript:void(0)" onclick="openForgotPassword()" style="color: var(--primary-orange); font-size: 13px; font-weight: 600; text-decoration: none;">Forgot Password?</a>
+          </div>
           <input type="password" id="password" class="form-control" placeholder="••••••••••••" required />
 
           <button type="submit" class="btn btn-primary" id="btn-login"><i class='bx bx-log-in-circle'></i> Sign in</button>
-          <button type="button" class="btn btn-secondary" onclick="handleSendOtp()"><i class='bx bx-mobile-alt'></i> Request OTP</button>
         </form>
       </div>
 
       <div id="step-otp" style="display: none;">
-        <h4>Two-Factor Authentication</h4>
-        <p>We've sent a 6-digit secure code to your email. Please verify to continue.</p>
+        <h4>Forgot Password</h4>
+        <p>Please enter your email and the 6-digit OTP code sent to you to reset your password.</p>
         
         <div id="alert-otp" class="alert alert-danger"></div>
 
         <form onsubmit="handleVerifyOtp(event)">
+          <label class="form-label">Role Definition</label>
+          <select id="otp-role" class="role-select">
+            <option value="Admin">Admin</option>
+            <option value="Manager">Manager</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Safety Officer">Safety Officer</option>
+            <option value="Worker">Worker</option>
+          </select>
+
+          <label class="form-label">Work Email</label>
+          <input type="email" id="otp-email" class="form-control" placeholder="Please enter your email" required />
+
+          <label class="form-label">Secure OTP</label>
           <div class="otp-inputs">
             <input type="text" maxlength="1" class="otp-box" required />
             <input type="text" maxlength="1" class="otp-box" required />
@@ -257,8 +272,22 @@
             <input type="text" maxlength="1" class="otp-box" required />
             <input type="text" maxlength="1" class="otp-box" required />
           </div>
-          <button type="submit" class="btn btn-primary" id="btn-verify"><i class='bx bx-check-shield'></i> Verify Credentials</button>
+          <button type="submit" class="btn btn-primary" id="btn-verify"><i class='bx bx-check-shield'></i> Verify OTP</button>
           <button type="button" class="btn btn-secondary" onclick="document.getElementById('step-login').style.display='block'; document.getElementById('step-otp').style.display='none';"><i class='bx bx-left-arrow-alt'></i> Return to Login</button>
+        </form>
+      </div>
+
+      <div id="step-reset" style="display: none;">
+        <h4>Set New Password</h4>
+        <p>Your identity has been verified. Please enter a new secure password.</p>
+        
+        <div id="alert-reset" class="alert alert-danger"></div>
+
+        <form onsubmit="handleResetPassword(event)">
+          <label class="form-label">New Password</label>
+          <input type="password" id="new-password" class="form-control" placeholder="••••••••••••" required />
+
+          <button type="submit" class="btn btn-primary" id="btn-reset"><i class='bx bx-save'></i> Save New Password</button>
         </form>
       </div>
     </div>
@@ -301,35 +330,39 @@
       }
     }
 
-    async function handleSendOtp() {
-      const email = document.getElementById('email').value;
-      if(!email) return showAlert('alert-msg', 'Please enter your email first to receive OTP.');
+    async function openForgotPassword() {
+      const emailInput = document.getElementById('email').value;
+      const roleInput = document.getElementById('role').value;
       
-      showAlert('alert-msg', 'Requesting secure OTP...', 'success');
-      try {
-        const res = await fetch('../php/send-otp.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        if(data.success) {
-          document.getElementById('step-login').style.display = 'none';
-          document.getElementById('step-otp').style.display = 'block';
-        } else {
-          showAlert('alert-msg', data.message);
-        }
-      } catch (err) {
-        // Fallback demo
-        document.getElementById('step-login').style.display = 'none';
-        document.getElementById('step-otp').style.display = 'block';
+      document.getElementById('step-login').style.display = 'none';
+      document.getElementById('step-otp').style.display = 'block';
+      
+      const otpEmailInput = document.getElementById('otp-email');
+      const otpRoleInput = document.getElementById('otp-role');
+      
+      if (emailInput) {
+        otpEmailInput.value = emailInput;
+        otpRoleInput.value = roleInput;
+        showAlert('alert-otp', 'OTP request sent to ' + emailInput, 'success');
+        
+        // Demo: Send OTP request
+        try {
+          await fetch('../php/send-otp.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailInput })
+          });
+        } catch (err) {}
+      } else {
+        otpEmailInput.value = '';
+        showAlert('alert-otp', 'Please enter your email to receive an OTP.', 'success');
       }
     }
 
     async function handleVerifyOtp(e) {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const role = document.getElementById('role').value;
+      const email = document.getElementById('otp-email').value;
+      const role = document.getElementById('otp-role').value;
       const boxes = document.querySelectorAll('.otp-box');
       let otp = '';
       boxes.forEach(b => otp += b.value);
@@ -346,15 +379,61 @@
           body: JSON.stringify({ email, otp, role })
         });
         const data = await res.json();
+        
+        // IMPORTANT: For this flow, we don't login immediately. We go to the reset password step!
         if(data.success) {
-          showAlert('alert-otp', data.message, 'success');
-          setTimeout(() => window.location.href = data.redirect || 'dashboard-manager.html', 1000);
+          // Keep the email safe for the next step
+          window.resetEmail = email;
+          window.resetRole = role;
+          
+          document.getElementById('step-otp').style.display = 'none';
+          document.getElementById('step-reset').style.display = 'block';
         } else {
           showAlert('alert-otp', data.message);
-          btn.innerHTML = "<i class='bx bx-check-shield'></i> Verify Credentials";
+          btn.innerHTML = "<i class='bx bx-check-shield'></i> Verify OTP";
         }
       } catch (err) {
-        window.location.href = 'dashboard-manager.html';
+        // Fallback demo for UI
+        window.resetEmail = email;
+        window.resetRole = role;
+        document.getElementById('step-otp').style.display = 'none';
+        document.getElementById('step-reset').style.display = 'block';
+      }
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      const newPassword = document.getElementById('new-password').value;
+      const btn = document.getElementById('btn-reset');
+      
+      if(!newPassword) return showAlert('alert-reset', 'Please enter a new password.');
+      btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Saving...";
+
+      try {
+        const res = await fetch('../php/api/reset-password.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: window.resetEmail, role: window.resetRole, newPassword: newPassword })
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+          showAlert('alert-reset', 'Password updated successfully!', 'success');
+          setTimeout(() => {
+            document.getElementById('step-reset').style.display = 'none';
+            document.getElementById('step-login').style.display = 'block';
+            document.getElementById('alert-msg').style.display = 'none';
+            document.getElementById('password').value = '';
+          }, 1500);
+        } else {
+          showAlert('alert-reset', data.message);
+          btn.innerHTML = "<i class='bx bx-save'></i> Save New Password";
+        }
+      } catch (err) {
+        // Fallback
+        alert('Password saved (demo mode)');
+        document.getElementById('step-reset').style.display = 'none';
+        document.getElementById('step-login').style.display = 'block';
       }
     }
 
