@@ -34,6 +34,11 @@
     .modal-content {
       background: var(--vg-bg-surface); border: 1px solid var(--vg-border); border-radius: var(--vg-radius-lg); width: 100%; max-width: 500px;
     }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
@@ -168,11 +173,16 @@
                   <tr id="history-1" class="history-row" style="display: none; background: rgba(0,0,0,0.15);">
                     <td colspan="4" style="padding: 0;">
                       <div style="padding: 24px; margin: 12px 24px; background: var(--vg-bg-main); border-radius: 8px; border: 1px solid var(--vg-border);">
-                        <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                          <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
-                        </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                          <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
+                          </h4>
+                          <button onclick="downloadHistoryCSV('System Administrator')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 12px; font-size: 12px; border-color: rgba(255,255,255,0.1);">
+                            <i class='bx bx-download'></i> Download Report (.csv)
+                          </button>
+                        </div>
                         
-                        <div style="position: relative; padding-left: 16px;">
+                        <div class="custom-scrollbar" style="max-height: 200px; overflow-y: auto; padding-right: 12px; position: relative; padding-left: 16px;">
                           <!-- Vertical line -->
                           <div style="position: absolute; left: 3px; top: 6px; bottom: 6px; width: 2px; background: var(--vg-border);"></div>
                           
@@ -205,7 +215,7 @@
                           </div>
 
                           <!-- Timeline Item 3 -->
-                          <div style="position: relative;">
+                          <div style="position: relative; margin-bottom: 20px;">
                             <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-text-muted); border: 2px solid var(--vg-bg-main);"></div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                               <div>
@@ -214,6 +224,32 @@
                               </div>
                               <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
                                 Aug 21, 05:00 PM<br>IP: 192.168.1.105
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Older Mock Items for scrolling -->
+                          <div style="position: relative; margin-bottom: 20px;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-status-info); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Logged In</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">System authentication</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Aug 21, 09:00 AM<br>IP: 192.168.1.105
+                              </div>
+                            </div>
+                          </div>
+                          <div style="position: relative;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-status-warning); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Deleted User</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">Removed account for 'old_worker@visionguard.local'</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Aug 20, 11:30 AM<br>IP: 192.168.1.105
                               </div>
                             </div>
                           </div>
@@ -234,11 +270,16 @@
                   <tr id="history-2" class="history-row" style="display: none; background: rgba(0,0,0,0.15);">
                     <td colspan="4" style="padding: 0;">
                       <div style="padding: 24px; margin: 12px 24px; background: var(--vg-bg-main); border-radius: 8px; border: 1px solid var(--vg-border);">
-                        <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                          <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
-                        </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                          <h4 style="font-size: 14px; font-weight: 600; color: var(--text-white); margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class='bx bx-history' style="color: var(--vg-accent-primary); font-size: 18px;"></i> Session Activity Timeline
+                          </h4>
+                          <button onclick="downloadHistoryCSV('Field Supervisor')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 12px; font-size: 12px; border-color: rgba(255,255,255,0.1);">
+                            <i class='bx bx-download'></i> Download Report (.csv)
+                          </button>
+                        </div>
                         
-                        <div style="position: relative; padding-left: 16px;">
+                        <div class="custom-scrollbar" style="max-height: 200px; overflow-y: auto; padding-right: 12px; position: relative; padding-left: 16px;">
                           <div style="position: absolute; left: 3px; top: 6px; bottom: 6px; width: 2px; background: var(--vg-border);"></div>
                           
                           <!-- Timeline Item 1 -->
@@ -270,7 +311,7 @@
                           </div>
                           
                           <!-- Timeline Item 3 -->
-                          <div style="position: relative;">
+                          <div style="position: relative; margin-bottom: 20px;">
                             <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-status-info); border: 2px solid var(--vg-bg-main);"></div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                               <div>
@@ -279,6 +320,20 @@
                               </div>
                               <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
                                 Today, 08:30 AM<br>IP: 10.0.4.55
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Older mock item -->
+                          <div style="position: relative;">
+                            <div style="position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--vg-text-muted); border: 2px solid var(--vg-bg-main);"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <div>
+                                <div style="font-size: 13px; color: var(--text-white); font-weight: 500;">Session Terminated</div>
+                                <div style="font-size: 12px; color: var(--vg-text-secondary); margin-top: 4px;">User logged out</div>
+                              </div>
+                              <div style="font-size: 12px; color: var(--vg-text-muted); text-align: right;">
+                                Yesterday, 04:30 PM<br>IP: 10.0.4.55
                               </div>
                             </div>
                           </div>
@@ -363,6 +418,32 @@
       } else {
         row.style.display = 'none';
       }
+    }
+
+    function downloadHistoryCSV(userName) {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Timestamp,User,Action,IP Address\r\n";
+      
+      if (userName.includes('Admin')) {
+        csvContent += "Today 12:35 PM,System Administrator,Active Session Ongoing (Viewing User Management Dashboard),192.168.1.105\r\n";
+        csvContent += "Yesterday 10:15 AM,System Administrator,Password Updated (User changed their password via Admin Panel),192.168.1.105\r\n";
+        csvContent += "Aug 21 05:00 PM,System Administrator,Logged Out (Manual logout),192.168.1.105\r\n";
+        csvContent += "Aug 21 09:00 AM,System Administrator,Logged In (System authentication),192.168.1.105\r\n";
+        csvContent += "Aug 20 11:30 AM,System Administrator,Deleted User (Removed account for old_worker@visionguard.local),192.168.1.105\r\n";
+      } else {
+        csvContent += "Today 10:30 AM,Field Supervisor,Session Terminated (User logged out),10.0.4.55\r\n";
+        csvContent += "Today 09:15 AM,Field Supervisor,Approved Hot Work Permit (Permit #HW-4092 Approved for Site B),10.0.4.55\r\n";
+        csvContent += "Today 08:30 AM,Field Supervisor,Logged In (OTP Verified Successfully),10.0.4.55\r\n";
+        csvContent += "Yesterday 04:30 PM,Field Supervisor,Session Terminated (User logged out),10.0.4.55\r\n";
+      }
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${userName.replace(/ /g, '_')}_Activity_Log.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     let allUsers = [];
