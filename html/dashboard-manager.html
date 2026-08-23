@@ -129,14 +129,14 @@
       </div>
 
       <nav class="vg-sidebar-nav">
-        <a href="javascript:void(0)" onclick="switchView('executive-queue-view', this)" class="vg-nav-link active">
-          <i class='bx bx-crown'></i> Executive Queue
+        <a href="javascript:void(0)" onclick="switchView('executive-queue-view', this)" class="vg-nav-link active" title="Executive Queue">
+          <i class='bx bx-crown'></i> <span class="vg-nav-link-text">Executive Queue</span>
         </a>
-        <a href="javascript:void(0)" onclick="switchView('active-permits-view', this)" class="vg-nav-link">
-          <i class='bx bx-file'></i> Active Permits
+        <a href="javascript:void(0)" onclick="switchView('active-permits-view', this)" class="vg-nav-link" title="Active Permits">
+          <i class='bx bx-file'></i> <span class="vg-nav-link-text">Active Permits</span>
         </a>
-        <a href="javascript:void(0)" onclick="switchView('permit-history-view', this)" class="vg-nav-link">
-          <i class='bx bx-history'></i> Permit History
+        <a href="javascript:void(0)" onclick="switchView('permit-history-view', this)" class="vg-nav-link" title="Permit History">
+          <i class='bx bx-history'></i> <span class="vg-nav-link-text">Permit History</span>
         </a>
       </nav>
 
@@ -156,6 +156,9 @@
       <!-- Topbar Header -->
       <header class="vg-header">
         <div style="display: flex; align-items: center; gap: 16px;">
+          <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Toggle Menu">
+            <i class='bx bx-menu'></i>
+          </button>
           <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
             <i class='bx bx-arrow-back'></i>
           </button>
@@ -478,6 +481,12 @@
     let pendingCount = 6;
     let currentPermitId = null;
     let currentRowId = null;
+
+    // Sidebar Toggle Logic
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.vg-sidebar');
+      sidebar.classList.toggle('collapsed');
+    }
 
     // View Toggling Logic
     function switchView(viewId, navElement) {
