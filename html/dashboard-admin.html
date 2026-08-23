@@ -64,10 +64,10 @@
       <!-- Sidebar -->
       <aside class="vg-sidebar">
         <nav class="vg-sidebar-nav" style="margin-top: 12px;">
-          <a href="javascript:void(0)" onclick="switchAdminView('user-management', this)" class="vg-nav-link active" title="User Management">
+          <a href="javascript:void(0)" onclick="switchAdminView('user-management-view', this)" class="vg-nav-link active" title="User Management">
             <i class='bx bx-group'></i> <span class="vg-nav-link-text">User Management</span>
           </a>
-          <a href="javascript:void(0)" onclick="switchAdminView('system-logs', this)" class="vg-nav-link" title="System Logs">
+          <a href="javascript:void(0)" onclick="switchAdminView('system-logs-view', this)" class="vg-nav-link" title="System Logs">
             <i class='bx bx-list-ol'></i> <span class="vg-nav-link-text">System Logs</span>
           </a>
         </nav>
@@ -262,7 +262,9 @@
       const roleFilter = document.getElementById('filterRole').value;
 
       const filtered = allUsers.filter(u => {
-        const matchesSearch = u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
+        const userName = u.name || '';
+        const userEmail = u.email || '';
+        const matchesSearch = userName.toLowerCase().includes(searchTerm) || userEmail.toLowerCase().includes(searchTerm);
         const matchesRole = roleFilter === "" || u.role === roleFilter;
         return matchesSearch && matchesRole;
       });
