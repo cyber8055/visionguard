@@ -22,6 +22,7 @@
     }
     .admin-form-group input:focus, .admin-form-group select:focus {
       border-color: var(--vg-accent-primary);
+    }
     .admin-form-group select option {
       background: var(--vg-bg-surface);
       color: var(--vg-text-primary);
@@ -88,27 +89,31 @@
         <!-- USER MANAGEMENT VIEW -->
         <div id="user-management-view" class="admin-view">
           <div class="vg-card" style="padding: 0; overflow: hidden;">
-            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
-              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
+            <div style="padding: 16px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
                 <i class='bx bx-shield-quarter' style="color: var(--vg-accent-primary);"></i> User Access & Credentials
               </h3>
-              <button onclick="openUserModal()" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-plus'></i> Add New User</button>
-            </div>
+              
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div style="position: relative;">
+                  <i class='bx bx-search' style="position: absolute; left: 10px; top: 10px; color: var(--vg-text-muted); font-size: 16px;"></i>
+                  <input type="text" id="searchUser" onkeyup="filterUsers()" placeholder="Search users..." style="width: 220px; padding: 8px 12px 8px 32px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-white); outline: none; font-size: 13px; transition: border-color 0.2s;">
+                </div>
+                
+                <div style="position: relative;">
+                  <i class='bx bx-filter-alt' style="position: absolute; left: 10px; top: 10px; color: var(--vg-text-muted); font-size: 16px;"></i>
+                  <select id="filterRole" onchange="filterUsers()" style="padding: 8px 12px 8px 32px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-white); outline: none; font-size: 13px; appearance: none; -webkit-appearance: none; min-width: 130px; cursor: pointer;">
+                    <option value="" style="background: var(--vg-bg-surface); color: white;">All Roles</option>
+                    <option value="Admin" style="background: var(--vg-bg-surface); color: white;">Admin</option>
+                    <option value="Manager" style="background: var(--vg-bg-surface); color: white;">Manager</option>
+                    <option value="Supervisor" style="background: var(--vg-bg-surface); color: white;">Supervisor</option>
+                    <option value="Safety Officer" style="background: var(--vg-bg-surface); color: white;">Safety Officer</option>
+                    <option value="Worker" style="background: var(--vg-bg-surface); color: white;">Worker</option>
+                  </select>
+                </div>
 
-            <!-- Filters & Search -->
-            <div style="padding: 16px 24px; background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--vg-border); display: flex; gap: 16px; align-items: center;">
-              <div style="flex: 1; position: relative;">
-                <i class='bx bx-search' style="position: absolute; left: 12px; top: 9px; color: var(--vg-text-muted); font-size: 18px;"></i>
-                <input type="text" id="searchUser" onkeyup="filterUsers()" placeholder="Search users by name or email..." style="width: 100%; padding: 8px 12px 8px 36px; background: var(--vg-bg-main); border: 1px solid var(--vg-border); border-radius: 6px; color: var(--vg-text-primary); outline: none;">
+                <button type="button" onclick="openUserModal()" class="vg-btn vg-btn-primary vg-btn-sm" style="padding: 8px 16px;"><i class='bx bx-plus'></i> Add User</button>
               </div>
-              <select id="filterRole" onchange="filterUsers()" style="padding: 8px 12px; background: var(--vg-bg-main); border: 1px solid var(--vg-border); border-radius: 6px; color: var(--vg-text-primary); outline: none;">
-                <option value="">All Roles</option>
-                <option value="Admin">Admin</option>
-                <option value="Manager">Manager</option>
-                <option value="Supervisor">Supervisor</option>
-                <option value="Safety Officer">Safety Officer</option>
-                <option value="Worker">Worker</option>
-              </select>
             </div>
 
             <div class="vg-table-wrapper">
@@ -132,40 +137,42 @@
 
         <!-- SYSTEM LOGS VIEW -->
         <div id="system-logs-view" class="admin-view" style="display: none;">
-          <div class="vg-card">
-            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 16px;">
-              <i class='bx bx-list-ol' style="color: var(--vg-accent-primary);"></i> System Audit Logs
-            </h3>
-            <p style="color: var(--vg-text-secondary); margin-bottom: 24px;">This section is designed to track security events such as login attempts, password changes, and user modifications. (Feature pending integration).</p>
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); background: var(--vg-bg-surface);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-pulse' style="color: var(--vg-accent-primary);"></i> Active Sessions & Activity History
+              </h3>
+              <p style="color: var(--vg-text-secondary); margin: 8px 0 0 0; font-size: 14px;">Monitor currently active users and click a row to view their detailed session history.</p>
+            </div>
             
             <div class="vg-table-wrapper">
-              <table class="vg-table">
+              <table class="vg-table" style="cursor: pointer;">
                 <thead>
                   <tr>
-                    <th>Timestamp</th>
-                    <th>Action</th>
-                    <th>User / IP</th>
-                    <th>Status</th>
+                    <th>User</th>
+                    <th>Role Definition</th>
+                    <th>Current Status</th>
+                    <th>Last Active</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Just now</td>
-                    <td>Admin logged in</td>
-                    <td>admin@visionguard.local</td>
-                    <td><span class="vg-badge vg-badge-success">Success</span></td>
+                  <tr onclick="alert('Demo: Showing history for System Administrator\n- Logged in: Today at 09:00 AM\n- Password changed: Yesterday\n- Logged out: Today at 05:00 PM')">
+                    <td>
+                      <strong>System Administrator</strong><br>
+                      <small style="color: var(--vg-text-muted);">admin@visionguard.local</small>
+                    </td>
+                    <td><span class="vg-badge vg-badge-danger">Admin</span></td>
+                    <td><span class="vg-badge vg-badge-success" style="background: rgba(16, 185, 129, 0.15); color: #10b981;"><span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px;"></span>Active Now</span></td>
+                    <td style="color: var(--vg-text-muted);">Just now</td>
                   </tr>
-                  <tr>
-                    <td>10 mins ago</td>
-                    <td>Password reset attempt</td>
-                    <td>supervisor@visionguard.local</td>
-                    <td><span class="vg-badge vg-badge-success">Success</span></td>
-                  </tr>
-                  <tr>
-                    <td>1 hour ago</td>
-                    <td>Failed login</td>
-                    <td>unknown</td>
-                    <td><span class="vg-badge vg-badge-danger">Failed</span></td>
+                  <tr onclick="alert('Demo: Showing history for Field Supervisor\n- Logged in: Today at 08:30 AM\n- Action: Approved Hot Work Permit\n- Logged out: Today at 04:30 PM')">
+                    <td>
+                      <strong>Field Supervisor</strong><br>
+                      <small style="color: var(--vg-text-muted);">supervisor@visionguard.local</small>
+                    </td>
+                    <td><span class="vg-badge vg-badge-info">Supervisor</span></td>
+                    <td><span class="vg-badge" style="background: rgba(255, 255, 255, 0.05); color: var(--vg-text-muted);">Offline</span></td>
+                    <td style="color: var(--vg-text-muted);">2 hours ago</td>
                   </tr>
                 </tbody>
               </table>
