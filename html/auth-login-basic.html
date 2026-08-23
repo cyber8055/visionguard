@@ -121,6 +121,34 @@
       box-shadow: 0 0 0 3px rgba(255, 91, 53, 0.2);
     }
     
+    /* Fix for browser autofill background in dark mode */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px #1c2333 inset !important;
+      -webkit-text-fill-color: white !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .password-toggle-icon {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 5;
+    }
+    .password-toggle-icon:hover {
+      color: var(--primary-orange);
+      transform: scale(1.1);
+    }
+    .password-toggle-icon:active {
+      transform: scale(0.9);
+    }
+    
     .role-select option {
       background: var(--bg-dark);
       color: var(--text-white);
@@ -362,7 +390,7 @@
           </div>
           <div style="position: relative;">
             <input type="password" id="password" class="form-control" placeholder="••••••••••••" style="padding-right: 48px;" required />
-            <i class='bx bx-show' id="toggle-password" onclick="togglePasswordVisibility('password', 'toggle-password')" style="position: absolute; right: 16px; top: 16px; color: #94a3b8; cursor: pointer; font-size: 20px; transition: color 0.2s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'"></i>
+            <i class='bx bx-show password-toggle-icon' id="toggle-password" onclick="togglePasswordVisibility('password', 'toggle-password')"></i>
           </div>
 
           <div class="hcaptcha-widget" id="hcaptcha-box" onclick="verifyCaptcha()">
@@ -428,7 +456,7 @@
           <label class="form-label">New Password</label>
           <div style="position: relative;">
             <input type="password" id="new-password" class="form-control" placeholder="••••••••••••" style="padding-right: 48px;" required />
-            <i class='bx bx-show' id="toggle-new-password" onclick="togglePasswordVisibility('new-password', 'toggle-new-password')" style="position: absolute; right: 16px; top: 16px; color: #94a3b8; cursor: pointer; font-size: 20px; transition: color 0.2s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'"></i>
+            <i class='bx bx-show password-toggle-icon' id="toggle-new-password" onclick="togglePasswordVisibility('new-password', 'toggle-new-password')"></i>
           </div>
 
           <button type="submit" class="btn btn-primary" id="btn-reset"><i class='bx bx-save'></i> Save New Password</button>
