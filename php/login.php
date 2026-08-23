@@ -18,20 +18,61 @@ if (empty($email) || empty($password)) {
 }
 
 $_SESSION['authenticated_user'] = $email;
-$_SESSION['user_role'] = $role;
+
+// Read users database
+$usersFile = __DIR__ . '/data/users.json';
+if (!file_exists($usersFile)) {
+    echo json_encode(['success' => false, 'message' => 'User database not found.']);
+    exit;
+}
+$usersData = json_decode(file_get_contents($usersFile), true);
+
+$authenticated = false;
+$userRole = null;
+$isAdminSuperLogin = false;
+
+foreach ($usersData as $u) {
+    if ($u['email'] === $email && $u['password'] === $password) {
+        if ($u['role'] === 'Admin') {
+            // Admin can login to any role requested
+            $authenticated = true;
+            $userRole = $role; // Set the session role to what they requested
+            $isAdminSuperLogin = true;
+            break;
+        } else if ($u['role'] === $role) {
+            // Exact match for non-admins
+            $authenticated = true;
+            $userRole = $u['role'];
+            break;
+        }
+    }
+}
+
+if (!$authenticated) {
+    echo json_encode(['success' => false, 'message' => 'Invalid email, password, or role.']);
+    exit;
+}
+
+$_SESSION['user_role'] = $userRole;
 
 // Role-Based Target Redirection
 $redirectUrl = 'dashboard-manager.html';
-if ($role === 'Supervisor') {
+if ($userRole === 'Supervisor') {
     $redirectUrl = 'dashboard-supervisor.html';
-} else if ($role === 'Safety Officer') {
+} else if ($userRole === 'Safety Officer') {
     $redirectUrl = 'dashboard-safety.html';
-} else if ($role === 'Worker') {
+} else if ($userRole === 'Worker') {
     $redirectUrl = 'dashboard-worker.html';
+} else if ($userRole === 'Admin') {
+    $redirectUrl = 'dashboard-admin.html';
 }
+
+$msg = $isAdminSuperLogin && $userRole !== 'Admin' 
+       ? "Admin Override: Logged in as {$userRole}"
+       : "Welcome back, {$userRole}! Sign-in successful.";
 
 echo json_encode([
     'success' => true,
-    'message' => "Welcome back, {$role}! Sign-in successful.",
+    'message' => $msg,
     'redirect' => $redirectUrl
 ]);

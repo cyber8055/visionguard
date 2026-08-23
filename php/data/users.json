@@ -1,0 +1,37 @@
+[
+    {
+        "id": "1",
+        "email": "admin@visionguard.local",
+        "password": "admin",
+        "role": "Admin",
+        "name": "System Administrator"
+    },
+    {
+        "id": "2",
+        "email": "manager@visionguard.local",
+        "password": "pass",
+        "role": "Manager",
+        "name": "Executive Manager"
+    },
+    {
+        "id": "3",
+        "email": "supervisor@visionguard.local",
+        "password": "pass",
+        "role": "Supervisor",
+        "name": "Field Supervisor"
+    },
+    {
+        "id": "4",
+        "email": "safety@visionguard.local",
+        "password": "pass",
+        "role": "Safety Officer",
+        "name": "Safety Inspector"
+    },
+    {
+        "id": "5",
+        "email": "worker@visionguard.local",
+        "password": "pass",
+        "role": "Worker",
+        "name": "Site Worker"
+    }
+]

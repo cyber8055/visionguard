@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Administration | VisionGuard</title>
+  
+  <link rel="stylesheet" href="../assets/css/visionguard.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    .admin-form-group { margin-bottom: 16px; }
+    .admin-form-group label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--vg-text-secondary); }
+    .admin-form-group input, .admin-form-group select {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--vg-border);
+      border-radius: var(--vg-radius);
+      color: var(--vg-text-primary);
+      outline: none;
+    }
+    .admin-form-group input:focus, .admin-form-group select:focus {
+      border-color: var(--vg-accent-primary);
+    }
+    
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-content {
+      background: var(--vg-bg-surface); border: 1px solid var(--vg-border); border-radius: var(--vg-radius-lg); width: 100%; max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="vg-app-shell">
+    <!-- Global Header -->
+    <header class="vg-header">
+      <div class="vg-header-left">
+        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 38px; height: 38px; padding: 0; background: transparent; border: none; font-size: 24px; color: var(--vg-text-primary);" title="Toggle Menu">
+          <i class='bx bx-menu'></i>
+        </button>
+        <a href="dashboard-admin.html" class="vg-header-brand">
+          <i class='bx bx-check-shield'></i>
+          <span>VisionGuard</span>
+        </a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="vg-header-title">
+          <h2 id="main-header-title">System Administration</h2>
+        </div>
+      </div>
+    </header>
+
+    <div class="vg-app-body">
+      <!-- Sidebar -->
+      <aside class="vg-sidebar">
+        <nav class="vg-sidebar-nav" style="margin-top: 12px;">
+          <a href="javascript:void(0)" class="vg-nav-link active" title="User Management">
+            <i class='bx bx-group'></i> <span class="vg-nav-link-text">User Management</span>
+          </a>
+          <a href="javascript:void(0)" class="vg-nav-link" title="System Logs" style="opacity: 0.5;">
+            <i class='bx bx-server'></i> <span class="vg-nav-link-text">System Logs</span>
+          </a>
+        </nav>
+
+        <div class="vg-sidebar-user">
+          <div class="vg-user-info">
+            <h5>Admin</h5>
+            <p>Master Control</p>
+          </div>
+          <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
+            <i class='bx bx-log-out'></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Area -->
+      <main class="vg-content-area">
+        
+        <div class="vg-card" style="padding: 0; overflow: hidden;">
+          <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
+              <i class='bx bx-shield-quarter' style="color: var(--vg-accent-primary);"></i> User Access & Credentials
+            </h3>
+            <button onclick="openUserModal()" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-plus'></i> Add New User</button>
+          </div>
+
+          <div class="vg-table-wrapper">
+            <table class="vg-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Work Email</th>
+                  <th>Role Definition</th>
+                  <th>Password</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="5" style="text-align: center;">Loading users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit User Modal -->
+  <div id="userModal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 id="modalTitle" style="font-family: var(--font-outfit); font-size: 20px; font-weight: 700; color: var(--text-white);">Add New User</h3>
+        <button onclick="closeUserModal()" style="background: transparent; border: none; color: var(--vg-text-secondary); cursor: pointer;"><i class='bx bx-x' style="font-size: 24px;"></i></button>
+      </div>
+
+      <form id="userForm" onsubmit="handleSaveUser(event)" style="padding: 24px;">
+        <input type="hidden" id="userId" />
+        
+        <div class="admin-form-group">
+          <label>Full Name</label>
+          <input type="text" id="userName" required placeholder="e.g. John Doe" />
+        </div>
+        
+        <div class="admin-form-group">
+          <label>Work Email</label>
+          <input type="email" id="userEmail" required placeholder="name@visionguard.local" />
+        </div>
+        
+        <div class="admin-form-group">
+          <label>Role</label>
+          <select id="userRole" required>
+            <option value="Admin">Admin (Master)</option>
+            <option value="Manager">Manager</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Safety Officer">Safety Officer</option>
+            <option value="Worker">Worker</option>
+          </select>
+        </div>
+
+        <div class="admin-form-group">
+          <label>Password</label>
+          <input type="text" id="userPassword" required placeholder="••••••••" />
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+          <button type="button" onclick="closeUserModal()" class="vg-btn vg-btn-secondary">Cancel</button>
+          <button type="submit" class="vg-btn vg-btn-primary" id="saveUserBtn">Save Credentials</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.querySelector('.vg-sidebar').classList.toggle('collapsed');
+    }
+
+    let allUsers = [];
+
+    async function fetchUsers() {
+      try {
+        const res = await fetch('../php/api/manage-users.php');
+        const data = await res.json();
+        if(data.success) {
+          allUsers = data.data;
+          renderUsers();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderUsers() {
+      const tbody = document.getElementById('users-tbody');
+      if(allUsers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No users found.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      allUsers.forEach(u => {
+        let roleBadge = '';
+        if(u.role === 'Admin') roleBadge = '<span class="vg-badge vg-badge-danger">Admin</span>';
+        else if(u.role === 'Manager') roleBadge = '<span class="vg-badge vg-badge-accent">Manager</span>';
+        else if(u.role === 'Supervisor') roleBadge = '<span class="vg-badge vg-badge-info">Supervisor</span>';
+        else if(u.role === 'Safety Officer') roleBadge = '<span class="vg-badge vg-badge-success">Safety Officer</span>';
+        else roleBadge = '<span class="vg-badge vg-badge-warning">Worker</span>';
+
+        html += `
+          <tr>
+            <td><strong>${u.name}</strong></td>
+            <td class="code-font">${u.email}</td>
+            <td>${roleBadge}</td>
+            <td style="color: var(--vg-text-muted); font-family: var(--font-mono);">${u.password}</td>
+            <td>
+              <button onclick="editUser('${u.id}')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 8px;"><i class='bx bx-edit'></i> Edit</button>
+              <button onclick="deleteUser('${u.id}')" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 8px; border-color: rgba(239, 68, 68, 0.3); color: var(--vg-status-danger);"><i class='bx bx-trash'></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function openUserModal() {
+      document.getElementById('userForm').reset();
+      document.getElementById('userId').value = '';
+      document.getElementById('modalTitle').innerText = 'Add New User';
+      document.getElementById('userModal').style.display = 'flex';
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').style.display = 'none';
+    }
+
+    function editUser(id) {
+      const user = allUsers.find(u => u.id === id);
+      if(user) {
+        document.getElementById('userId').value = user.id;
+        document.getElementById('userName').value = user.name;
+        document.getElementById('userEmail').value = user.email;
+        document.getElementById('userRole').value = user.role;
+        document.getElementById('userPassword').value = user.password;
+        document.getElementById('modalTitle').innerText = 'Edit User';
+        document.getElementById('userModal').style.display = 'flex';
+      }
+    }
+
+    async function deleteUser(id) {
+      if(!confirm("Are you sure you want to delete this user?")) return;
+      try {
+        const res = await fetch('../php/api/manage-users.php', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if(data.success) {
+          fetchUsers();
+        } else alert(data.message);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function handleSaveUser(e) {
+      e.preventDefault();
+      const id = document.getElementById('userId').value;
+      const payload = {
+        name: document.getElementById('userName').value,
+        email: document.getElementById('userEmail').value,
+        role: document.getElementById('userRole').value,
+        password: document.getElementById('userPassword').value,
+      };
+      
+      const method = id ? 'PUT' : 'POST';
+      if(id) payload.id = id;
+
+      const btn = document.getElementById('saveUserBtn');
+      btn.innerText = 'Saving...';
+      
+      try {
+        const res = await fetch('../php/api/manage-users.php', {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+          closeUserModal();
+          fetchUsers();
+        } else {
+          alert(data.message);
+        }
+      } catch(err) {
+        console.error(err);
+      } finally {
+        btn.innerText = 'Save Credentials';
+      }
+    }
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", fetchUsers);
+  </script>
+</body>
+</html>
