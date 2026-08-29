@@ -86,11 +86,29 @@ body {
   z-index: 50;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
+  overflow-y: hidden;
   white-space: nowrap;
 }
 
 .vg-sidebar.collapsed {
   width: 76px;
+}
+
+.vg-sidebar.collapsed .vg-nav-header {
+  opacity: 0;
+  display: none;
+}
+
+.vg-nav-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--vg-text-muted);
+  padding: 8px 16px 4px 16px;
+  margin-bottom: 4px;
+  opacity: 1;
+  transition: opacity 0.2s;
 }
 
 
@@ -101,6 +119,13 @@ body {
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  overflow-y: auto;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.vg-sidebar-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .vg-nav-link {
@@ -116,8 +141,12 @@ body {
   transition: all 0.2s ease;
 }
 .vg-sidebar.collapsed .vg-nav-link {
-  justify-content: center;
-  padding: 12px 0;
+  justify-content: center !important;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  gap: 0 !important;
 }
 .vg-nav-link-text {
   transition: opacity 0.2s;
@@ -205,6 +234,37 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Mobile Menu Button Base (No Box) */
+.mobile-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--vg-text-primary);
+  font-size: 26px; /* Slightly larger as requested */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -8px; /* Perfectly aligns center with sidebar icons */
+  border-radius: var(--vg-radius);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.mobile-menu-btn:hover {
+  color: var(--vg-accent-primary);
+}
+
+.mobile-menu-btn i {
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.mobile-menu-btn i.rotated {
+  transform: rotate(-180deg) scale(0.85);
+  color: var(--vg-accent-primary);
 }
 
 .vg-header-brand {

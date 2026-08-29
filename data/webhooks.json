@@ -1,0 +1,16 @@
+[
+    {
+        "id": "WH-101",
+        "name": "Discord Emergency Alerts",
+        "url": "https://discord.com/api/webhooks/...",
+        "events": ["Emergency Lockdown", "Critical Incidents"],
+        "status": "Active"
+    },
+    {
+        "id": "WH-102",
+        "name": "Slack Operations Sync",
+        "url": "https://hooks.slack.com/services/...",
+        "events": ["Shift Changes", "Daily Reports"],
+        "status": "Inactive"
+    }
+]

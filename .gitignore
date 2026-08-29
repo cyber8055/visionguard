@@ -1,0 +1,24 @@
+# Environment Variables
+.env
+data/env.json
+
+# Temporary Files / Scripts
+*.py
+*.js.temp
+*.log
+screenshot.png
+admin_screenshot.png
+
+# Sensitive Data / Local Database
+data/sessions.json
+data/auth_logs.json
+data/incidents.json
+data/system_logs.json
+
+# Dependencies
+node_modules/
+vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db

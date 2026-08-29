@@ -1,13 +1,32 @@
 <?php
-// VisionGuard Brevo API & SMTP Credentials Configuration
-define('BREVO_API_KEY', 'YOUR_API_KEY_HERE');
-define('BREVO_SMTP_KEY', 'YOUR_SMTP_KEY_HERE');
-define('BREVO_SMTP_USER', 'b64830001@smtp-brevo.com');
-define('BREVO_SENDER_NAME', 'VisionGuard Security Operations');
-define('BREVO_SENDER_EMAIL', 'abhisheksharana9@gmail.com');
-define('OTP_EXPIRY_SECONDS', 300); // 5 minutes
+// Dynamic Environment Configuration Loader
+$envPath = __DIR__ . '/../data/env.json';
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'vision_guard_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+if (file_exists($envPath)) {
+    $envData = json_decode(file_get_contents($envPath), true);
+    
+    if ($envData) {
+        $aiKeys = [];
+        
+        foreach ($envData as $key => $value) {
+            // Collect individual AI keys into the array
+            if (strpos($key, 'NVIDIA_KEY_') === 0 || strpos($key, 'GEMINI_KEY_') === 0) {
+                if (!empty(trim($value))) {
+                    $aiKeys[] = trim($value);
+                }
+            }
+            
+            if (!defined($key)) {
+                define($key, $value);
+            }
+        }
+        
+        // Expose the bundled array for legacy support
+        if (!defined('AI_API_KEYS')) {
+            define('AI_API_KEYS', $aiKeys);
+        }
+    }
+} else {
+    die("FATAL ERROR: Environment configuration (env.json) is missing. System halted for security.");
+}
+?>

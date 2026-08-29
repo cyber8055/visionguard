@@ -1,0 +1,7 @@
+{
+    "incident_reports_days": 365,
+    "auth_logs_days": 90,
+    "camera_footage_days": 30,
+    "database_backups_days": 180,
+    "auto_purge_enabled": true
+}

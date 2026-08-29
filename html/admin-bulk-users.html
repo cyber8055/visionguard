@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bulk User Sync | VisionGuard Admin</title>
+  
+  <link rel="stylesheet" href="../assets/css/visionguard.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  
+  <!-- Jspreadsheet (Excel-like grid) Dependencies - LOAD JSUITES FIRST -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsuites/4.3.0/jsuites.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsuites/4.3.0/jsuites.min.css" type="text/css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jexcel/4.6.1/jexcel.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jexcel/4.6.1/jexcel.min.css" type="text/css" />
+
+  <style>
+    .sheet-tab {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      color: var(--vg-text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-family: var(--font-outfit);
+      transition: all 0.2s;
+    }
+    .sheet-tab.active {
+      color: var(--vg-accent-primary);
+      border-bottom-color: var(--vg-accent-primary);
+      background: rgba(255, 91, 53, 0.05);
+    }
+    .sheet-tab:hover:not(.active) {
+      background: rgba(255,255,255,0.02);
+    }
+    
+    /* Jspreadsheet Dark Theme Overrides */
+    .jexcel_container { font-family: var(--font-inter); width: 100%; }
+    .jexcel > thead > tr > td { background-color: rgba(0,0,0,0.4) !important; color: #fff !important; font-weight: 600; border-color: rgba(255,255,255,0.1) !important; }
+    .jexcel > tbody > tr > td { background-color: var(--vg-bg-surface) !important; color: var(--text-white) !important; border-color: rgba(255,255,255,0.05) !important; font-size: 14px; }
+    .jexcel > tbody > tr > td.readonly { background-color: rgba(0,0,0,0.2) !important; color: var(--vg-text-muted) !important; }
+    .jexcel > tbody > tr.selected > td { background-color: rgba(255, 91, 53, 0.1) !important; }
+    .jexcel_corner { background-color: rgba(0,0,0,0.6) !important; border-color: rgba(255,255,255,0.1) !important; }
+  </style>
+</head>
+<body>
+
+  <div class="vg-app-shell">
+    <header class="vg-header">
+      <div class="vg-header-left">
+        <a href="dashboard-admin.html" class="vg-header-brand">
+          <i class='bx bx-check-shield'></i>
+          <span>VisionGuard</span>
+        </a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
+          <i class='bx bx-arrow-back'></i>
+        </button>
+        <div class="vg-header-title">
+          <h2>Bulk User Sync (Excel Grid)</h2>
+        </div>
+      </div>
+    </header>
+
+    <div class="vg-app-body" style="padding: 20px;">
+      <main class="vg-content-area" style="max-width: 1400px; margin: 0 auto; margin-left:0;">
+        
+        <div class="vg-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; min-height: 700px;">
+          <div style="padding: 16px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
+            <div>
+              <p style="color: var(--vg-text-secondary); margin: 0; font-size: 14px;">Copy/Paste directly from MS Excel. Data syncs with database.</p>
+            </div>
+            
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <span id="sync-status" style="font-size: 13px; color: var(--vg-status-success); display: none;"><i class='bx bx-check-circle'></i> Synced successfully</span>
+              <button type="button" onclick="loadSpreadsheet()" class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 8px 16px;"><i class='bx bx-refresh'></i> Reload Grid</button>
+              <button type="button" onclick="saveSpreadsheet()" class="vg-btn vg-btn-primary vg-btn-sm" style="padding: 8px 16px; background-color: #10b981; border-color: #10b981;"><i class='bx bx-cloud-upload'></i> Save Grid to Database</button>
+            </div>
+          </div>
+          
+          <!-- Google Sheets Live Sync Bar -->
+          <div style="padding: 12px 24px; border-bottom: 1px solid var(--vg-border); display: flex; align-items: center; background: rgba(59, 130, 246, 0.05); gap: 12px;">
+            <i class='bx bx-spreadsheet' style="color: #3b82f6; font-size: 20px;"></i>
+            <span style="font-size: 14px; font-weight: 500; color: var(--vg-text-primary);">Google Sheets Sync:</span>
+            <input type="text" id="g-sheet-url" placeholder="Paste public Google Sheet URL here..." class="vg-input" style="flex: 1; max-width: 500px; padding: 6px 12px; font-size: 13px;">
+            <button type="button" onclick="syncFromGoogleSheets()" class="vg-btn vg-btn-primary vg-btn-sm" style="padding: 8px 16px; background-color: #3b82f6; border-color: #3b82f6;"><i class='bx bx-cloud-download'></i> Pull from Google Sheet</button>
+            <span id="gsync-status" style="font-size: 13px; margin-left: auto;"></span>
+          </div>
+
+          <!-- Role Tabs -->
+          <div style="display: flex; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--vg-border); padding: 0 16px;" id="tabs-container">
+            <button class="sheet-tab" data-role="Admin" onclick="switchRoleSheet('Admin')">Admin</button>
+            <button class="sheet-tab" data-role="Manager" onclick="switchRoleSheet('Manager')">Manager</button>
+            <button class="sheet-tab active" data-role="Supervisor" onclick="switchRoleSheet('Supervisor')">Supervisor</button>
+            <button class="sheet-tab" data-role="Safety Officer" onclick="switchRoleSheet('Safety Officer')">Safety Officer</button>
+            <button class="sheet-tab" data-role="Worker" onclick="switchRoleSheet('Worker')">Worker</button>
+          </div>
+
+          <div style="flex: 1; overflow: auto; padding: 16px; background: var(--vg-bg-dark);">
+            <div id="spreadsheet"></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let currentRole = 'Supervisor';
+    let mySpreadsheet = null;
+
+    // Define Role-Specific Columns based on User Feedback
+    const columnDefinitions = {
+      'Admin': [
+        { type: 'text', title: 'Name', width: 280, name: 'name' },
+        { type: 'text', title: 'Work Email', width: 320, name: 'email' },
+        { type: 'text', title: 'Role', width: 200, name: 'role', readOnly: true },
+        { type: 'text', title: 'Temporary Password', width: 250, name: 'password' },
+        { type: 'dropdown', title: 'Sync Status', width: 200, source: ['Pending', 'Synced', 'Error'], name: 'status', readOnly: true }
+      ],
+      'Manager': [
+        { type: 'text', title: 'Name', width: 280, name: 'name' },
+        { type: 'text', title: 'Work Email', width: 320, name: 'email' },
+        { type: 'text', title: 'Role', width: 200, name: 'role', readOnly: true },
+        { type: 'text', title: 'Temporary Password', width: 250, name: 'password' },
+        { type: 'dropdown', title: 'Department', width: 200, source: ['Operations', 'Maintenance', 'HSE', 'Engineering'], name: 'department' },
+        { type: 'dropdown', title: 'Sync Status', width: 200, source: ['Pending', 'Synced', 'Error'], name: 'status', readOnly: true }
+      ],
+      'Supervisor': [
+        { type: 'text', title: 'Name', width: 250, name: 'name' },
+        { type: 'text', title: 'Work Email', width: 280, name: 'email' },
+        { type: 'text', title: 'Role', width: 180, name: 'role', readOnly: true },
+        { type: 'text', title: 'Temporary Password', width: 200, name: 'password' },
+        { type: 'dropdown', title: 'Shift', width: 150, source: ['Morning', 'Evening', 'Night'], name: 'shift' },
+        { type: 'dropdown', title: 'Sync Status', width: 180, source: ['Pending', 'Synced', 'Error'], name: 'status', readOnly: true }
+      ],
+      'Safety Officer': [
+        { type: 'text', title: 'Name', width: 250, name: 'name' },
+        { type: 'text', title: 'Work Email', width: 280, name: 'email' },
+        { type: 'text', title: 'Role', width: 180, name: 'role', readOnly: true },
+        { type: 'text', title: 'Temporary Password', width: 200, name: 'password' },
+        { type: 'text', title: 'Certification ID', width: 200, name: 'cert_id' },
+        { type: 'dropdown', title: 'Sync Status', width: 180, source: ['Pending', 'Synced', 'Error'], name: 'status', readOnly: true }
+      ],
+      'Worker': [
+        { type: 'text', title: 'Name', width: 250, name: 'name' },
+        { type: 'text', title: 'Work Email', width: 280, name: 'email' },
+        { type: 'text', title: 'Role', width: 180, name: 'role', readOnly: true },
+        { type: 'text', title: 'Temporary Password', width: 200, name: 'password' },
+        { type: 'text', title: 'Trade/Skill', width: 200, name: 'trade' },
+        { type: 'dropdown', title: 'Sync Status', width: 180, source: ['Pending', 'Synced', 'Error'], name: 'status', readOnly: true }
+      ]
+    };
+
+    function switchRoleSheet(role) {
+      currentRole = role;
+      document.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.sheet-tab[data-role="${role}"]`).classList.add('active');
+      loadSpreadsheet();
+    }
+
+    async function loadSpreadsheet() {
+      if (mySpreadsheet) {
+        mySpreadsheet.destroy();
+        document.getElementById('spreadsheet').innerHTML = '';
+      }
+      
+      const cols = columnDefinitions[currentRole];
+      
+      try {
+        const res = await fetch('../php/api/bulk-user-sync.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'fetch', role: currentRole })
+        });
+        const data = await res.json();
+        
+        let rowData = [];
+        if (data.success && data.data.length > 0) {
+          rowData = data.data.map(u => {
+            let row = [];
+            cols.forEach(c => row.push(u[c.name] || ''));
+            return row;
+          });
+        }
+        
+        // Add some empty rows for easy pasting
+        for(let i=0; i<50; i++) {
+           rowData.push(cols.map(() => ''));
+        }
+
+        mySpreadsheet = jexcel(document.getElementById('spreadsheet'), {
+          data: rowData,
+          columns: cols,
+          minDimensions: [cols.length, 20],
+          defaultColWidth: 150,
+          tableOverflow: true,
+          tableWidth: "100%",
+          tableHeight: "600px",
+          rowResize: true,
+          columnDrag: true,
+        });
+
+      } catch(e) {
+        console.error("Error loading spreadsheet", e);
+      }
+    }
+
+    async function saveSpreadsheet() {
+      if (!mySpreadsheet) return;
+      const btn = document.querySelector('button[onclick="saveSpreadsheet()"]');
+      btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Syncing...";
+      btn.disabled = true;
+
+      const rawData = mySpreadsheet.getData();
+      const cols = columnDefinitions[currentRole];
+      
+      let payloadData = [];
+      rawData.forEach(row => {
+        let obj = {};
+        let hasData = false;
+        row.forEach((cell, index) => {
+          if (cell !== '') hasData = true;
+          obj[cols[index].name] = cell;
+        });
+        if (hasData) {
+          payloadData.push(obj);
+        }
+      });
+
+      try {
+        const res = await fetch('../php/api/bulk-user-sync.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'sync', role: currentRole, data: payloadData })
+        });
+        const out = await res.json();
+        if (out.success) {
+          const s = document.getElementById('sync-status');
+          s.style.display = 'inline-flex';
+          s.innerHTML = `<i class='bx bx-check-circle'></i> ${out.message}`;
+          setTimeout(() => s.style.display = 'none', 3000);
+        } else {
+          alert("Error: " + out.message);
+        }
+      } catch(e) {
+        alert("Network Error");
+      }
+      
+      btn.innerHTML = "<i class='bx bx-cloud-upload'></i> Save / Sync to Database";
+      btn.disabled = false;
+      
+      // Reload to clean up empty rows
+      setTimeout(() => loadSpreadsheet(), 500);
+    }
+
+    async function syncFromGoogleSheets() {
+      const urlInput = document.getElementById('g-sheet-url').value.trim();
+      const statusSpan = document.getElementById('gsync-status');
+      
+      if (!urlInput) {
+        alert("Please paste the Google Sheet URL first.");
+        return;
+      }
+      
+      statusSpan.style.color = "var(--vg-status-info)";
+      statusSpan.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Syncing from Google...";
+      
+      try {
+        const res = await fetch('../php/api/google-sheets-sync.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: currentRole, sheet_url: urlInput })
+        });
+        const out = await res.json();
+        
+        if (out.success) {
+          statusSpan.style.color = "var(--vg-status-success)";
+          statusSpan.innerHTML = `<i class='bx bx-check-circle'></i> ${out.message}`;
+          setTimeout(() => statusSpan.innerHTML = "", 5000);
+          
+          // Reload the local grid to show the newly synced data
+          loadSpreadsheet();
+        } else {
+          statusSpan.style.color = "var(--vg-status-danger)";
+          statusSpan.innerHTML = `<i class='bx bx-error'></i> Error: ${out.message}`;
+        }
+      } catch(e) {
+        statusSpan.style.color = "var(--vg-status-danger)";
+        statusSpan.innerHTML = `<i class='bx bx-error'></i> Network Error`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Auth check
+      const token = sessionStorage.getItem('vg_token');
+      if (!token) { window.location.href = 'auth-login-basic.html'; return; }
+      
+      switchRoleSheet('Supervisor'); // Default tab
+    });
+  </script>
+<script src="../assets/js/vg-loader.js"></script>
+</body>
+</html>

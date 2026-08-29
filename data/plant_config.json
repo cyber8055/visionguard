@@ -1,0 +1,8 @@
+{
+    "facility_name": "VisionGuard Alpha Facility",
+    "total_zones": 12,
+    "operating_shifts": 3,
+    "timezone": "UTC+5:30",
+    "emergency_protocol": "Strict",
+    "max_occupancy": 1500
+}

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Safety Officer Portal | VisionGuard Operations</title>
@@ -11,10 +14,11 @@
 <body>
 
   <div class="vg-app-shell">
+    <div class="vg-app-body">
     
     <aside class="vg-sidebar">
       <div class="vg-sidebar-brand">
-        <img src="../assets/img/new-logo.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
+        <img src="../assets/img/new-logo.png" alt="Logo" style="height: 32px;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
         <span>VisionGuard</span>
       </div>
 
@@ -29,7 +33,7 @@
           <h5>Safety Inspector</h5>
           <p>Compliance Officer</p>
         </div>
-        <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
+        <a href="#" onclick="handleLogout()" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
           <i class='bx bx-log-out'></i>
         </a>
       </div>
@@ -113,6 +117,7 @@
       </main>
     </div>
 
+    </div>
   </div>
   <!-- Permit View Modal -->
   <div id="permitModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px;">
@@ -132,6 +137,7 @@
         <button onclick="document.getElementById('permitModal').style.display='none'" class="vg-btn vg-btn-secondary">Close</button>
       </div>
     </div>
+    </div>
   </div>
 
   <script>
@@ -139,6 +145,46 @@
       document.getElementById('modalTitle').innerText = 'Permit Details: ' + permitId;
       document.getElementById('permitModal').style.display = 'flex';
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const vgToken = sessionStorage.getItem('vg_token');
+      if (!vgToken) {
+        window.location.href = 'auth-login-basic.html';
+      }
+    });
+
+    async function handleLogout() {
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        try { await fetch('../php/api/logout.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }); } catch(e) {}
+      }
+      sessionStorage.removeItem('vg_token');
+      window.location.href = 'auth-login-basic.html';
+    }
+  
+    // Smart Heartbeat: Announce online status
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        fetch('../php/api/ping.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(e=>console.log(e));
+        setInterval(() => {
+          fetch('../php/api/ping.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(e=>console.log(e));
+        }, 30000);
+      }
+    });
+
+    // Smart Heartbeat: Announce offline status on tab close/refresh without destroying session
+    window.addEventListener('pagehide', () => {
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        navigator.sendBeacon('../php/api/offline.php', new URLSearchParams({ token: token }));
+      }
+    });
   </script>
+<script src="../assets/js/vg-loader.js"></script>
 </body>
 </html>
+
+
+
+

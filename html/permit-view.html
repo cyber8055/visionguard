@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Permit Document Viewer | VisionGuard</title>
   
   <link rel="stylesheet" href="../assets/css/visionguard.css" />
@@ -12,9 +15,9 @@
     body {
       background: var(--vg-bg-base);
     }
-    .permit-document-sheet {
+    .permit-document-sheet { min-width: 900px;
       max-width: 1000px;
-      margin: 0 auto;
+      margin: 0;
       background: #FFFFFF;
       color: #1A202C;
       border: 2px solid #000;
@@ -34,40 +37,109 @@
     
     .signature-block { color: #1D4ED8; font-family: cursive; font-size: 15px; display: block; margin-top: 5px; }
 
-    @media print {
-      body { background: #FFF !important; padding: 0 !important; color: #000 !important; }
-      .d-print-none { display: none !important; }
-      .permit-document-sheet { border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    }
+          @media (max-width: 768px) {
+        .vg-header h2 { font-size: 16px !important; }
+        .vg-header .bx-check-shield { font-size: 20px !important; }
+        .vg-header { padding: 10px 15px !important; }
+        .vg-header .vg-btn { font-size: 12px !important; padding: 6px 10px !important; }
+        .permit-document-sheet { margin-bottom: 30px !important; }
+      }
+      
+      html, body {
+        overflow: visible !important;
+        overflow-y: auto !important;
+        overflow-x: auto !important;
+        height: auto !important;
+        min-height: 100vh !important;
+      }
+      
+      /* Make header fixed */
+      .vg-header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100% !important;
+        box-sizing: border-box;
+        z-index: 999;
+      }
+      
+      .permit-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 40px;
+        touch-action: pan-x pan-y;
+      }
+
+      @media print {
+        @page { size: A4 portrait; margin: 15mm; }
+        html, body, main, .permit-wrapper {
+          overflow: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          height: auto !important;
+          display: block !important;
+          background: #FFF !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-sizing: border-box;
+        }
+        main { padding: 0 !important; margin: 0 !important; }
+        .permit-document-sheet {
+          width: 100% !important;
+          min-width: 100% !important;
+          max-width: 100% !important;
+          overflow: visible !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+          background: #FFF !important;
+          box-shadow: none !important;
+          border: none !important;
+          transform: none !important;
+        }
+        table, tr, td, th, tbody, thead, tfoot {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+        .doc-header {
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+          margin-top: 15px !important;
+        }
+        .d-print-none { display: none !important; }
+      }
   </style>
 </head>
-<body>
+<body style="overflow-y: auto !important; height: auto !important;">
 
   <!-- Topbar Controls -->
   <header class="vg-header d-print-none" style="padding: 15px 40px; background: rgba(15,22,41,0.95); border-bottom: 1px solid var(--vg-border);">
-    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0;">
       <div style="display: flex; align-items: center; gap: 16px;">
         <i class='bx bx-check-shield' style="font-size: 28px; color: var(--vg-accent-primary);"></i>
         <h2 style="margin: 0; font-family: var(--font-outfit); font-weight: 700;">Official Permit Viewer</h2>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <button type="button" class="vg-btn vg-btn-primary" onclick="window.print()">
-          <i class='bx bx-printer'></i> Print PDF
-        </button>
-        <button type="button" onclick="window.history.back();" class="vg-btn vg-btn-secondary">
-          <i class='bx bx-arrow-back'></i> Return to Dashboard
-        </button>
-      </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <button type="button" class="vg-btn vg-btn-primary" onclick="openExtensionModal()">
+            <i class='bx bx-calendar-plus'></i> Extend Permit
+          </button>
+          <button type="button" class="vg-btn vg-btn-secondary" onclick="window.print()">
+            <i class='bx bx-printer'></i> Print PDF
+          </button>
+          <button type="button" onclick="window.history.back();" class="vg-btn vg-btn-secondary">
+            <i class='bx bx-arrow-back'></i> Return to Dashboard
+          </button>
+        </div>
     </div>
   </header>
 
   <!-- Main Document Sheet Container -->
-  <main style="padding: 40px 20px;">
+    <main style="padding: 80px 0 40px 0; min-height: 100vh; display: block; text-align: center;">
     
-    <div class="permit-document-sheet" id="print-area">
+    <div class="permit-wrapper"><div class="permit-document-sheet" id="print-area">
       
-      <!-- Header Area -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
         <div>
           <h2 style="font-weight: 900; margin: 0 0 5px 0; color: #000; letter-spacing: 0.5px;" id="permit-main-title">GENERAL SAFETY & HAZARDOUS WORK PERMIT</h2>
@@ -79,8 +151,17 @@
             <div style="font-weight: 900; color: #DC2626; font-size: 22px;" id="permit-serial">PTW-20260822-5501</div>
             <div style="margin-top: 5px;"><span style="border: 1px solid #166534; color: #166534; padding: 3px 8px; font-weight: bold; font-size: 11px;">STATUS: APPROVED / ACTIVE</span></div>
           </div>
-          <div class="qr-box">DIGITAL<br/>QR<br/>VERIFIED</div>
+        <div style="display: flex; flex-direction: column; align-items: center; margin-left: 20px;">
+          <svg width="65" height="65" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="#fff" />
+            <path d="M10,10 h25 v25 h-25 z M15,15 h15 v15 h-15 z M10,65 h25 v25 h-25 z M15,70 h15 v15 h-15 z M65,10 h25 v25 h-25 z M70,15 h15 v15 h-15 z M45,45 h10 v10 h-10 z M45,10 h10 v10 h-10 z M10,45 h10 v10 h-10 z M25,45 h10 v10 h-10 z M65,65 h10 v10 h-10 z M80,80 h10 v10 h-10 z M65,45 h25 v10 h-25 z M45,65 h10 v25 h-10 z M80,45 h10 v25 h-10 z" fill="#000" />
+            <rect x="20" y="20" width="5" height="5" fill="#000"/>
+            <rect x="20" y="75" width="5" height="5" fill="#000"/>
+            <rect x="75" y="20" width="5" height="5" fill="#000"/>
+          </svg>
+          <span style="font-size: 10px; font-weight: bold; margin-top: 4px; color: #166534; letter-spacing: 0.5px;">VERIFIED</span>
         </div>
+      </div>
       </div>
 
       <!-- SECTION A -->
@@ -187,46 +268,80 @@
 
       <!-- SECTION D -->
       <div class="doc-header">SECTION D: ATMOSPHERIC GAS TESTING LOG (OISD-105 COMPLIANT)</div>
-      <table>
+      <table id="permit-gas-logs-table">
         <tr style="background: #f1f5f9;">
           <th>Parameter Tested</th>
           <th>Permissible Limits</th>
-          <th>Test Result 1 (08:00 AM)</th>
-          <th>Test Result 2 (12:00 PM)</th>
+          <th>Test Results</th>
           <th>Status</th>
         </tr>
         <tr>
-          <td>Oxygen ($O_2$) Content</td>
-          <td>19.5% - 23.5%</td>
-          <td><strong>20.9%</strong></td>
-          <td><strong>20.8%</strong></td>
-          <td class="status-pass">SAFE</td>
-        </tr>
-        <tr>
-          <td>Combustible Gas (LEL)</td>
-          <td>0% LEL</td>
-          <td><strong>0.0%</strong></td>
-          <td><strong>0.0%</strong></td>
-          <td class="status-pass">SAFE</td>
-        </tr>
-        <tr>
-          <td>Toxic Gas ($H_2S$)</td>
-          <td>< 5 PPM</td>
-          <td><strong>0 PPM</strong></td>
-          <td><strong>0 PPM</strong></td>
-          <td class="status-pass">SAFE</td>
-        </tr>
-        <tr>
-          <td>Toxic Gas (Carbon Monoxide)</td>
-          <td>< 25 PPM</td>
-          <td><strong>0 PPM</strong></td>
-          <td><strong>0 PPM</strong></td>
-          <td class="status-pass">SAFE</td>
+          <td colspan="4" style="text-align: center; color: #666;"><i class='bx bx-loader-alt bx-spin'></i> Loading gas logs...</td>
         </tr>
       </table>
 
-      <!-- SECTION E -->
-      <div class="doc-header">SECTION E: REQUIRED PERSONAL PROTECTIVE EQUIPMENT (PPE)</div>
+      <!-- SECTION E: JSA -->
+      <div class="doc-header">SECTION E: JOB SAFETY ANALYSIS (JSA) & HAZARD IDENTIFICATION</div>
+      <table>
+        <tr style="background: #f1f5f9;">
+          <th style="width: 5%;">Sr</th>
+          <th style="width: 30%;">Job Step</th>
+          <th style="width: 25%;">Identified Hazards</th>
+          <th style="width: 40%;">Control Measures Applied</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Entering the Confined Space (Tank V-101)</td>
+          <td>Asphyxiation, Toxic Gas Exposure</td>
+          <td>Continuous forced ventilation, Gas monitoring every 4 hours, Lifeline attached to full body harness.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Manual scraping of chemical residue</td>
+          <td>Skin contact, Eye irritation</td>
+          <td>Chemical resistant suit (Level B), Nitrile gloves, Full face shield required.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Using electrical tools inside tank</td>
+          <td>Electrocution, Spark leading to fire</td>
+          <td>Use 24V step-down transformer tools only. ELCB installed and verified.</td>
+        </tr>
+      </table>
+
+      <!-- SECTION F: CHECKLIST -->
+      <div class="doc-header">SECTION F: PERMIT COMPLIANCE CHECKLIST</div>
+      <table>
+        <tr style="background: #e2e8f0;">
+          <th style="width: 70%; text-align: left;">Requirement Check</th>
+          <th style="width: 10%; text-align: center;">YES</th>
+          <th style="width: 10%; text-align: center;">NO</th>
+          <th style="width: 10%; text-align: center;">N/A</th>
+        </tr>
+        <tr>
+          <td>Are all workers trained and competent for this specific task?</td>
+          <td class="status-pass" style="text-align: center;">X</td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>Is the work area properly barricaded with warning signs?</td>
+          <td class="status-pass" style="text-align: center;">X</td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>Is the standby person / hole-watcher present at the entrance?</td>
+          <td class="status-pass" style="text-align: center;">X</td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>Are fire extinguishers readily available near the job site?</td>
+          <td class="status-pass" style="text-align: center;">X</td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>Is communication equipment (walkie-talkie) tested and working?</td>
+          <td class="status-pass" style="text-align: center;">X</td><td></td><td></td>
+        </tr>
+      </table>
+
+      <!-- SECTION G: PPE -->
+      <div class="doc-header">SECTION G: REQUIRED PERSONAL PROTECTIVE EQUIPMENT (PPE)</div>
       <table>
         <tr>
           <td style="width: 25%;"><input type="checkbox" checked disabled> Safety Helmet</td>
@@ -242,8 +357,8 @@
         </tr>
       </table>
 
-      <!-- SECTION F -->
-      <div class="doc-header">SECTION F: MULTI-LEVEL DIGITAL SIGNATURES & FINAL APPROVAL</div>
+      <!-- SECTION H: SIGNATURES -->
+      <div class="doc-header">SECTION H: MULTI-LEVEL DIGITAL SIGNATURES & FINAL APPROVAL</div>
       <table>
         <tr style="background: #f1f5f9;">
           <th style="width: 25%;">Role</th>
@@ -254,26 +369,66 @@
         <tr>
           <td><strong>1. Job Initiator (Contractor/Maint)</strong></td>
           <td>Deepak Kumar (Supervisor)</td>
-          <td><span class="signature-block">[Signature Validated]</span></td>
+          <td style="text-align: center;"><div style="display: inline-flex; flex-direction: column; align-items: center; border: 1.5px solid #2563EB; padding: 4px 10px; border-radius: 4px; color: #2563EB; transform: rotate(-2deg);"><span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">Validated</span><span style="font-size: 9px; font-family: monospace;">ID: 98A7F6-V1</span></div></td>
           <td>08:15 AM</td>
         </tr>
         <tr>
           <td><strong>2. Area Operations In-Charge</strong></td>
           <td>Manoj Tiwari (Shift In-Charge)</td>
-          <td><span class="signature-block">[Clearance Issued]</span></td>
+          <td style="text-align: center;"><div style="display: inline-flex; flex-direction: column; align-items: center; border: 1.5px solid #2563EB; padding: 4px 10px; border-radius: 4px; color: #2563EB; transform: rotate(1deg);"><span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">Clearance Issued</span><span style="font-size: 9px; font-family: monospace;">ID: 44B2X9-C2</span></div></td>
           <td>08:20 AM</td>
         </tr>
         <tr>
           <td><strong>3. Safety Officer (Testing)</strong></td>
           <td>R. Sharma (Safety Lead)</td>
-          <td><span class="signature-block">[Gas Tests Passed & Verified]</span></td>
+          <td style="text-align: center;"><div style="display: inline-flex; flex-direction: column; align-items: center; border: 1.5px solid #2563EB; padding: 4px 10px; border-radius: 4px; color: #2563EB; transform: rotate(-1deg);"><span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">Gas Tests Verified</span><span style="font-size: 9px; font-family: monospace;">ID: 71G9P0-T3</span></div></td>
           <td>08:30 AM</td>
         </tr>
         <tr>
           <td><strong>4. Final Approval (Executive/HOD)</strong></td>
           <td>Abhishek Sharan (Manager)</td>
-          <td><span class="signature-block" style="color: #166534;">[Final Permit Approved]</span></td>
+          <td style="text-align: center;"><div style="display: inline-flex; flex-direction: column; align-items: center; border: 2px solid #166534; padding: 5px 12px; border-radius: 4px; color: #166534; transform: rotate(-3deg); background: rgba(22,101,52,0.05);"><span style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">Final Approved</span><span style="font-size: 10px; font-family: monospace;">ID: 10A8Z2-F4</span></div></td>
           <td>08:45 AM</td>
+        </tr>
+      </table>
+
+      <!-- SECTION I: EXTENSION -->
+      <div class="doc-header">SECTION I: PERMIT EXTENSION (IF APPLICABLE)</div>
+      <table>
+        <tr>
+          <td style="width: 25%;"><strong>Extension Requested Till:</strong></td>
+          <td style="width: 25%;">N/A</td>
+          <td style="width: 25%;"><strong>Reason for Extension:</strong></td>
+          <td style="width: 25%;">N/A</td>
+        </tr>
+        <tr>
+          <td><strong>Gas Tests Re-verified By:</strong></td>
+          <td>_______________</td>
+          <td><strong>Approved By (HOD):</strong></td>
+          <td>_______________</td>
+        </tr>
+      </table>
+
+      <!-- SECTION J: CLOSURE -->
+      <div class="doc-header">SECTION J: PERMIT CLOSURE & HANDOVER</div>
+      <table>
+        <tr>
+          <td colspan="4" style="font-size: 11px; padding: 10px;">
+            <input type="checkbox"> Job completed, all tools/materials removed, housekeeping done, and manpower withdrawn.<br>
+            <input type="checkbox"> Blinds removed, connections normalized, and equipment handed back to operations.
+          </td>
+        </tr>
+        <tr>
+          <td style="width: 25%;"><strong>Job Initiator Signature:</strong></td>
+          <td style="width: 25%;">_______________</td>
+          <td style="width: 25%;"><strong>Operations In-Charge Signature:</strong></td>
+          <td style="width: 25%;">_______________</td>
+        </tr>
+        <tr>
+          <td><strong>Closure Date & Time:</strong></td>
+          <td>_______________</td>
+          <td><strong>Permit Status:</strong></td>
+          <td>_______________</td>
         </tr>
       </table>
 
@@ -281,18 +436,240 @@
         * This document is generated automatically by the VisionGuard Enterprise Safety System. All digital signatures conform to IT Act 2000 regulations.<br/>
         Valid only for the specified date and time. Any deviation in plant conditions requires immediate halt of work and re-validation.
       </div>
+      
     </div>
+  </div></main>
 
-  </main>
+  <!-- Extend Permit Modal -->
+  <div id="extensionModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: var(--vg-bg-surface); border: 1px solid var(--vg-border); border-radius: var(--vg-radius-lg); width: 100%; max-width: 500px;">
+      <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-family: var(--font-outfit); font-size: 18px; color: var(--text-white);">Extend Permit Validity</h3>
+        <button class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px;" onclick="closeExtensionModal()">
+          <i class='bx bx-x' style="font-size: 20px;"></i>
+        </button>
+      </div>
+      <div style="padding: 24px;">
+        <form id="extensionForm" onsubmit="submitExtension(event)">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--vg-text-secondary);">Extend By (Days)</label>
+            <select id="ext-days" style="width: 100%; padding: 12px; font-size: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--vg-border); border-radius: var(--vg-radius); color: var(--text-white); outline: none;" required>
+              <option value="1">1 Day</option>
+              <option value="2">2 Days</option>
+              <option value="3">3 Days</option>
+              <option value="7">7 Days (Max)</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--vg-text-secondary);">Reason / Remarks</label>
+            <textarea id="ext-remarks" rows="3" style="width: 100%; padding: 12px; font-size: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--vg-border); border-radius: var(--vg-radius); color: var(--text-white); outline: none;" required placeholder="Enter reason for extension..."></textarea>
+          </div>
+          <div style="margin-bottom: 24px; padding: 12px; background: rgba(234, 179, 8, 0.1); border-left: 4px solid var(--vg-status-warning); border-radius: 4px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin: 0;">
+              <input type="checkbox" id="ext-confirm" required style="margin-top: 4px;">
+              <span style="font-size: 12px; color: var(--text-white); line-height: 1.4;">I confirm that the work area has been re-validated and new Annexure gas testing logs will be attached physically to the extended permit.</span>
+            </label>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" class="vg-btn vg-btn-secondary" onclick="closeExtensionModal()">Cancel</button>
+            <button type="submit" class="vg-btn vg-btn-primary" id="ext-submit-btn">Authorize Extension</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
+    function openExtensionModal() {
+      document.getElementById('extensionModal').style.display = 'flex';
+    }
+    function closeExtensionModal() {
+      document.getElementById('extensionModal').style.display = 'none';
+      document.getElementById('extensionForm').reset();
+    }
+    async function submitExtension(e) {
+      e.preventDefault();
+      const btn = document.getElementById('ext-submit-btn');
+      btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
+      btn.disabled = true;
+      
+      const payload = {
+        permit_id: permitId,
+        extend_days: document.getElementById('ext-days').value,
+        remarks: document.getElementById('ext-remarks').value
+      };
+      
+      try {
+        const res = await fetch('../php/api/permits-api.php?action=extend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Permit successfully extended by ' + payload.extend_days + ' days.');
+          closeExtensionModal();
+          // Ideally refresh the page or update the validity dates on UI
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (err) {
+        alert('Failed to connect to the server.');
+      }
+      
+      btn.innerHTML = "Authorize Extension";
+      btn.disabled = false;
+    }
     // Extract query param to update title dynamically
     const urlParams = new URLSearchParams(window.location.search);
     const permitId = urlParams.get('id');
     if (permitId) {
       document.getElementById('permit-serial').innerText = permitId;
       document.title = permitId + " | VisionGuard Permit";
+      loadPermitGasLogs(permitId);
+    } else {
+      // If no permit ID, just load all for demo purposes or show empty
+      loadPermitGasLogs('PTW-202608-5501'); 
     }
-  </script>
+    
+    async function loadPermitGasLogs(id) {
+      const table = document.getElementById('permit-gas-logs-table');
+      if (!table) return;
+      
+      try {
+        const token = sessionStorage.getItem('vg_token') || '';
+        // Note: permit-view.html might be viewed by anyone with the link if we allow it, 
+        // but let's pass token just in case.
+        const res = await fetch('../php/api/get-gas-logs.php?permit_id=' + encodeURIComponent(id), {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.data && data.data.length > 0) {
+          // We will show the latest 3 logs as columns, or just stack them.
+          // For a formal permit, columns are better: Test 1, Test 2, Test 3
+          let headerRow = `<tr style="background: #f1f5f9;">
+            <th>Parameter Tested</th>
+            <th>Permissible Limits</th>`;
+            
+          const logsToShow = data.data.slice(0, 3).reverse(); // oldest first left-to-right up to 3
+          
+          logsToShow.forEach((log, index) => {
+            const time = new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            headerRow += `<th>Test Result ${index + 1} (${time})</th>`;
+          });
+          headerRow += `<th>Status</th></tr>`;
+          
+          let o2Row = `<tr><td>Oxygen (O2) Content</td><td>19.5% - 23.5%</td>`;
+          let lelRow = `<tr><td>Combustible Gas (LEL)</td><td>0% LEL</td>`;
+          let h2sRow = `<tr><td>Toxic Gas (H2S)</td><td>< 5 PPM</td>`;
+          
+          let isSafe = true;
+          
+          logsToShow.forEach(log => {
+            const o2 = parseFloat(log.o2);
+            const lel = parseFloat(log.lel);
+            const h2s = parseFloat(log.h2s);
+            
+            if (o2 < 19.5 || o2 > 23.5) isSafe = false;
+            if (lel > 10) isSafe = false; // LEL limit usually 10% for hot work
+            if (h2s > 10) isSafe = false;
+            
+            o2Row += `<td><strong>${log.o2}%</strong></td>`;
+            lelRow += `<td><strong>${log.lel}%</strong></td>`;
+            h2sRow += `<td><strong>${log.h2s} PPM</strong></td>`;
+          });
+          
+          const statusCell = isSafe ? `<td class="status-pass">SAFE</td>` : `<td style="color: #ef4444; font-weight:bold; background: rgba(239, 68, 68, 0.1);">UNSAFE</td>`;
+          
+          o2Row += statusCell + `</tr>`;
+          lelRow += statusCell + `</tr>`;
+          h2sRow += statusCell + `</tr>`;
+          
+          table.innerHTML = headerRow + o2Row + lelRow + h2sRow;
+        } else {
+          table.innerHTML = `
+            <tr style="background: #f1f5f9;">
+              <th>Parameter Tested</th>
+              <th>Permissible Limits</th>
+              <th>Test Results</th>
+              <th>Status</th>
+            </tr>
+            <tr>
+              <td colspan="4" style="text-align: center; color: #ef4444;">No gas testing logs recorded yet.</td>
+            </tr>
+          `;
+        }
+      } catch (err) {
+        console.error("Failed to load gas logs", err);
+        table.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ef4444;">Failed to fetch gas logs.</td></tr>`;
+      }
+    }
+    
+      // Flawless Touch Pinch-to-Zoom Logic (Transform Engine with Bounds)
+      const minZoom = window.innerWidth <= 768 ? ((window.innerWidth - 20) / 950) : 0.5; 
+      let currentZoom = window.innerWidth <= 768 ? minZoom : 1.0;
+      const permitSheet = document.getElementById('print-area');
+      const touchWrapper = document.querySelector('.permit-wrapper');
+
+      function applyZoom() {
+        permitSheet.style.transform = "scale(" + currentZoom + ")";
+        permitSheet.style.transformOrigin = "top left";
+        
+        // Perfectly crop the invisible layout bounds to kill the infinity gaps on ALL browsers
+        const scaledWidth = 950 * currentZoom;
+        const scaledHeight = permitSheet.scrollHeight * currentZoom;
+        touchWrapper.style.width = scaledWidth + "px";
+        touchWrapper.style.height = scaledHeight + "px";
+        touchWrapper.style.overflow = "hidden";
+        touchWrapper.style.margin = "0 auto";
+      }
+
+      let startDist = 0;
+      let initialZoom = currentZoom;
+      let isPinching = false;
+
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length >= 2) {
+          isPinching = true;
+          const dx = e.touches[0].pageX - e.touches[1].pageX;
+          const dy = e.touches[0].pageY - e.touches[1].pageY;
+          startDist = Math.sqrt(dx * dx + dy * dy);
+          initialZoom = currentZoom;
+          if (e.cancelable) e.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchmove', function(e) {
+        if (isPinching && e.touches.length >= 2) {
+          if (e.cancelable) e.preventDefault(); 
+          const dx = e.touches[0].pageX - e.touches[1].pageX;
+          const dy = e.touches[0].pageY - e.touches[1].pageY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (startDist > 0) {
+            currentZoom = initialZoom * (dist / startDist);
+            if (currentZoom < minZoom) currentZoom = minZoom;
+            if (currentZoom > 3.0) currentZoom = 3.0;
+            applyZoom();
+          }
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', function(e) {
+        if (e.touches.length < 2) isPinching = false;
+      });
+
+      document.addEventListener('touchcancel', function(e) {
+        if (e.touches.length < 2) isPinching = false;
+      });
+
+      setTimeout(applyZoom, 100);
+    </script>
+<script src="../assets/js/vg-loader.js"></script>
 </body>
 </html>
+
+
+
+

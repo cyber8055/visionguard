@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manager Approval Center | VisionGuard</title>
@@ -76,7 +79,7 @@
     /* Custom Scrollbar for tables */
     .scrollable-table {
       overflow-y: auto;
-      max-height: calc(100vh - 300px);
+      max-height: calc(100vh - 380px);
     }
     .scrollable-table::-webkit-scrollbar { width: 6px; }
     .scrollable-table::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
@@ -115,6 +118,64 @@
     .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: #fff; }
     .page-btn.active { background: var(--vg-accent-primary); color: #000; border-color: var(--vg-accent-primary); font-weight: bold; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Single Page Lock */
+    body {
+      overflow: hidden !important;
+      height: 100vh !important;
+      margin: 0;
+    }
+    .vg-content-area {
+      overflow: hidden; /* Prevent body extension */
+    }
+    /* Flip Card CSS */
+    .flip-card {
+      background-color: transparent;
+      width: 450px;
+      height: 500px;
+      perspective: 1000px;
+      margin: auto;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background: var(--vg-bg-surface);
+      border: 1px solid var(--vg-border);
+      border-radius: var(--vg-radius);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      text-align: left;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      background: linear-gradient(135deg, var(--vg-bg-surface), #0a1128);
+    }
+    .qr-container {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
@@ -124,8 +185,8 @@
     <!-- Global Header -->
     <header class="vg-header">
       <div class="vg-header-left">
-        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 38px; height: 38px; padding: 0; background: transparent; border: none; font-size: 24px; color: var(--vg-text-primary);" title="Toggle Menu">
-          <i class='bx bx-menu'></i>
+        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="margin-left: -8px; border-radius: 50%; width: 38px; height: 38px; padding: 0; background: transparent; border: none; font-size: 24px; color: var(--vg-text-primary);" title="Toggle Menu">
+          <i class='bx bx-menu' style="transition: transform 0.2s ease;"></i>
         </button>
         <a href="dashboard-manager.html" class="vg-header-brand">
           <i class='bx bx-check-shield'></i>
@@ -155,15 +216,37 @@
           <a href="javascript:void(0)" onclick="switchView('permit-history-view', this)" class="vg-nav-link" title="Permit History">
             <i class='bx bx-history'></i> <span class="vg-nav-link-text">Permit History</span>
           </a>
+          
+          <a href="javascript:void(0)" onclick="switchView('org-tree-view', this); loadOrgTree();" class="vg-nav-link" title="Organization Hierarchy">
+            <i class='bx bx-network-chart'></i> <span class="vg-nav-link-text">Org Hierarchy</span>
+          </a>
+          
+          <a href="javascript:void(0)" onclick="switchView('incident-reports-view', this); loadIncidentReports('All'); toggleSubmenu('incident-submenu');" class="vg-nav-link" title="Incident Reports" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <i class='bx bx-message-alt-error'></i> <span class="vg-nav-link-text">Incident Reports</span>
+            </div>
+            <i class='bx bx-chevron-down vg-nav-link-text' style="font-size: 18px;"></i>
+          </a>
+          <div id="incident-submenu" class="submenu-container vg-nav-link-text" style="display: none; flex-direction: column; padding-left: 42px;">
+            <a href="javascript:void(0)" onclick="loadIncidentReports('Accident')" style="color: var(--vg-text-secondary); text-decoration: none; font-size: 13px; padding: 6px 0; transition: color 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.color='var(--text-white)'" onmouseout="this.style.color='var(--vg-text-secondary)'"><i class='bx bx-error' style="color: #ef4444; font-size: 16px;"></i> Accident</a>
+            <a href="javascript:void(0)" onclick="loadIncidentReports('Near Miss')" style="color: var(--vg-text-secondary); text-decoration: none; font-size: 13px; padding: 6px 0; transition: color 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.color='var(--text-white)'" onmouseout="this.style.color='var(--vg-text-secondary)'"><i class='bx bx-error-circle' style="color: #eab308; font-size: 16px;"></i> Near Miss</a>
+            <a href="javascript:void(0)" onclick="loadIncidentReports('Hardware Failure')" style="color: var(--vg-text-secondary); text-decoration: none; font-size: 13px; padding: 6px 0; transition: color 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.color='var(--text-white)'" onmouseout="this.style.color='var(--vg-text-secondary)'"><i class='bx bx-wrench' style="color: #3b82f6; font-size: 16px;"></i> Hardware Failure</a>
+            <a href="javascript:void(0)" onclick="loadIncidentReports('All')" style="color: var(--vg-text-secondary); text-decoration: none; font-size: 13px; padding: 6px 0; transition: color 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.color='var(--text-white)'" onmouseout="this.style.color='var(--vg-text-secondary)'"><i class='bx bx-file' style="font-size: 16px;"></i> All Incidents</a>
+          </div>
         </nav>
 
         <div class="vg-sidebar-user">
-          <div class="vg-user-info">
-            <h5>Executive Manager</h5>
-            <p>HOD Approver</p>
+          <div class="vg-user-info" onclick="openManagerPassport()" style="cursor: pointer; width: 100%;" title="View Manager Passport">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="https://ui-avatars.com/api/?name=Manager&background=ff5b35&color=fff&size=40" style="border-radius: 50%; width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.2);" />
+              <div>
+                <h5 style="margin: 0;">Executive Manager</h5>
+                <p style="margin: 0;">HOD Approver</p>
+              </div>
+            </div>
           </div>
-          <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
-            <i class='bx bx-log-out'></i>
+          <a href="#" onclick="handleLogout()" class="logout-btn" style="color: var(--vg-status-danger); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; text-decoration: none;" title="Sign Out" onmouseover="this.style.transform='scale(1.1)'; this.style.color='#ff3b3b';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--vg-status-danger)';">
+            <i class='bx bx-power-off'></i>
           </a>
         </div>
       </aside>
@@ -245,11 +328,11 @@
                     <td>Zone 02 - Flare Stack B</td>
                     <td>Rahul Singh (Supervisor)</td>
                     <td><span class="vg-badge vg-badge-success"><i class='bx bx-check'></i> Passed (Spark Shield)</span></td>
-                    <td style="display: flex; gap: 8px;">
+                    <td><div style="display: flex; gap: 8px; align-items: center; white-space: nowrap;">
                       <button onclick="openPermitModal('PTW-20260822-8812', 'Hot Work', 'Zone 02 - Flare Stack B', 'Rahul Singh')" class="vg-btn vg-btn-secondary vg-btn-sm" title="View Full Details"><i class='bx bx-show'></i> View</button>
                       <button onclick="handleApprove('row-8812', 'PTW-20260822-8812')" class="vg-btn vg-btn-primary vg-btn-sm" style="background: var(--vg-status-success); color: #000;"><i class='bx bx-check'></i> Approve</button>
                       <button class="vg-btn vg-btn-secondary vg-btn-sm" style="border-color: var(--vg-status-danger); color: var(--vg-status-danger);"><i class='bx bx-x'></i> Reject</button>
-                    </td>
+                    </div></td>
                   </tr>
                   <tr id="row-5103">
                     <td>3</td>
@@ -258,11 +341,11 @@
                     <td>Zone 10 - Storage Tank T-400</td>
                     <td>Vikram Patel (Supervisor)</td>
                     <td><span class="vg-badge vg-badge-success"><i class='bx bx-check'></i> Passed (Gas & LOTO)</span></td>
-                    <td style="display: flex; gap: 8px;">
+                    <td><div style="display: flex; gap: 8px; align-items: center; white-space: nowrap;">
                       <button onclick="openPermitModal('PTW-20260822-5103', 'Confined Space', 'Zone 10 - Storage Tank T-400', 'Vikram Patel')" class="vg-btn vg-btn-secondary vg-btn-sm" title="View Full Details"><i class='bx bx-show'></i> View</button>
                       <button onclick="handleApprove('row-5103', 'PTW-20260822-5103')" class="vg-btn vg-btn-primary vg-btn-sm" style="background: var(--vg-status-success); color: #000;"><i class='bx bx-check'></i> Approve</button>
                       <button class="vg-btn vg-btn-secondary vg-btn-sm" style="border-color: var(--vg-status-danger); color: var(--vg-status-danger);"><i class='bx bx-x'></i> Reject</button>
-                    </td>
+                    </div></td>
                   </tr>
                   <tr id="row-9914">
                     <td>4</td>
@@ -271,11 +354,11 @@
                     <td>Zone 05 - Boiler Structure</td>
                     <td>Sunil Kumar (Contractor)</td>
                     <td><span class="vg-badge vg-badge-success"><i class='bx bx-check'></i> Passed (Scaffold Valid)</span></td>
-                    <td style="display: flex; gap: 8px;">
+                    <td><div style="display: flex; gap: 8px; align-items: center; white-space: nowrap;">
                       <button onclick="openPermitModal('PTW-20260822-9914', 'Working at Height', 'Zone 05 - Boiler Structure', 'Sunil Kumar')" class="vg-btn vg-btn-secondary vg-btn-sm" title="View Full Details"><i class='bx bx-show'></i> View</button>
                       <button onclick="handleApprove('row-9914', 'PTW-20260822-9914')" class="vg-btn vg-btn-primary vg-btn-sm" style="background: var(--vg-status-success); color: #000;"><i class='bx bx-check'></i> Approve</button>
                       <button class="vg-btn vg-btn-secondary vg-btn-sm" style="border-color: var(--vg-status-danger); color: var(--vg-status-danger);"><i class='bx bx-x'></i> Reject</button>
-                    </td>
+                    </div></td>
                   </tr>
                   <tr id="row-1188">
                     <td>5</td>
@@ -284,11 +367,11 @@
                     <td>Zone 03 - Cooling Tower Fan</td>
                     <td>Deepak Sharma (Maint)</td>
                     <td><span class="vg-badge vg-badge-success"><i class='bx bx-check'></i> Passed (Isolation Done)</span></td>
-                    <td style="display: flex; gap: 8px;">
+                    <td><div style="display: flex; gap: 8px; align-items: center; white-space: nowrap;">
                       <button onclick="openPermitModal('PTW-20260822-1188', 'Cold Work', 'Zone 03 - Cooling Tower Fan', 'Deepak Sharma')" class="vg-btn vg-btn-secondary vg-btn-sm" title="View Full Details"><i class='bx bx-show'></i> View</button>
                       <button onclick="handleApprove('row-1188', 'PTW-20260822-1188')" class="vg-btn vg-btn-primary vg-btn-sm" style="background: var(--vg-status-success); color: #000;"><i class='bx bx-check'></i> Approve</button>
                       <button class="vg-btn vg-btn-secondary vg-btn-sm" style="border-color: var(--vg-status-danger); color: var(--vg-status-danger);"><i class='bx bx-x'></i> Reject</button>
-                    </td>
+                    </div></td>
                   </tr>
                   <tr id="row-4421">
                     <td>6</td>
@@ -297,11 +380,11 @@
                     <td>Substation A - Panel Board 4</td>
                     <td>Anil Verma (Electrical)</td>
                     <td><span class="vg-badge vg-badge-success"><i class='bx bx-check'></i> Passed (LOTO Applied)</span></td>
-                    <td style="display: flex; gap: 8px;">
+                    <td><div style="display: flex; gap: 8px; align-items: center; white-space: nowrap;">
                       <button onclick="openPermitModal('PTW-20260822-4421', 'Electrical Isolation', 'Substation A - Panel Board 4', 'Anil Verma')" class="vg-btn vg-btn-secondary vg-btn-sm" title="View Full Details"><i class='bx bx-show'></i> View</button>
                       <button onclick="handleApprove('row-4421', 'PTW-20260822-4421')" class="vg-btn vg-btn-primary vg-btn-sm" style="background: var(--vg-status-success); color: #000;"><i class='bx bx-check'></i> Approve</button>
                       <button class="vg-btn vg-btn-secondary vg-btn-sm" style="border-color: var(--vg-status-danger); color: var(--vg-status-danger);"><i class='bx bx-x'></i> Reject</button>
-                    </td>
+                    </div></td>
                   </tr>
                 </tbody>
               </table>
@@ -377,6 +460,63 @@
             
             <div class="pagination-container" id="history-pagination">
                <!-- Filled dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- INCIDENT REPORTS VIEW -->
+        <div id="incident-reports-view" class="dashboard-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); background: var(--vg-bg-surface);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-message-alt-error' style="color: var(--vg-status-danger);"></i> Plant Incident Reports
+              </h3>
+            </div>
+            <div class="vg-table-wrapper scrollable-table">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Timestamp</th>
+                    <th>
+                      <select id="filterType" style="background: transparent; color: var(--vg-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: none; font-family: var(--font-inter); outline: none; cursor: pointer; font-size: 12px; height: auto; max-width: 130px; margin: 0; padding: 0;" onchange="applyColumnFilters()">
+                        <option value="" style="background: #0f172a; color: #fff;">Type (All)</option>
+                      </select>
+                    </th>
+                    <th>
+                      <select id="filterSeverity" style="background: transparent; color: var(--vg-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: none; font-family: var(--font-inter); outline: none; cursor: pointer; font-size: 12px; height: auto; max-width: 130px; margin: 0; padding: 0;" onchange="applyColumnFilters()">
+                        <option value="" style="background: #0f172a; color: #fff;">Severity (All)</option>
+                      </select>
+                    </th>
+                    <th>
+                      <select id="filterLocation" style="background: transparent; color: var(--vg-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: none; font-family: var(--font-inter); outline: none; cursor: pointer; font-size: 12px; height: auto; max-width: 130px; margin: 0; padding: 0;" onchange="applyColumnFilters()">
+                        <option value="" style="background: #0f172a; color: #fff;">Plant (All)</option>
+                      </select>
+                    </th>
+                    <th>
+                      <select id="filterStatus" style="background: transparent; color: var(--vg-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: none; font-family: var(--font-inter); outline: none; cursor: pointer; font-size: 12px; height: auto; max-width: 130px; margin: 0; padding: 0;" onchange="applyColumnFilters()">
+                        <option value="" style="background: #0f172a; color: #fff;">Status (All)</option>
+                      </select>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="incidents-body">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ORGANIZATION HIERARCHY VIEW -->
+        <div id="org-tree-view" class="dashboard-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); background: var(--vg-bg-surface);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-network-chart' style="color: var(--vg-accent-primary);"></i> Organization Hierarchy & Passwords
+              </h3>
+            </div>
+            <div style="padding: 24px; overflow-y: auto;" id="org-tree-container">
+                <!-- Dynamic Tree goes here -->
             </div>
           </div>
         </div>
@@ -465,9 +605,54 @@
     // INITIALIZATION & STATE
     // ----------------------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
+      const vgToken = sessionStorage.getItem('vg_token');
+      if (!vgToken) {
+        window.location.href = 'auth-login-basic.html';
+        return;
+      }
+
+      // Smart Heartbeat: Announce online status
+      fetch('../php/api/ping.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + vgToken } }).catch(e=>console.log(e));
+      setInterval(() => {
+        fetch('../php/api/ping.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + vgToken } }).catch(e=>console.log(e));
+      }, 30000);
+
       initActivePermits();
       handleFilterChange();
+
+      // Restore Approvals from localStorage
+      let persistedApprovals = JSON.parse(localStorage.getItem('vg_manager_approvals') || '[]');
+      if (persistedApprovals.length > 0) {
+        persistedApprovals.forEach(app => {
+          const row = document.getElementById(app.rowId);
+          if (row) {
+            row.remove();
+            pendingCount--;
+            newlyApprovedPermits.unshift(app);
+          }
+        });
+        
+        document.getElementById('pending-count-metric').innerText = pendingCount;
+        const pBadge = document.getElementById('pending-badge');
+        if(pBadge) pBadge.innerText = pendingCount + " Action Required";
+        document.getElementById('approved-today-metric').innerText = 28 + newlyApprovedPermits.length;
+        
+        if(pendingCount === 0) {
+          document.getElementById('approval-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--vg-text-muted);">No pending approvals. All caught up!</td></tr>';
+        }
+      }
     });
+
+    async function handleLogout() {
+      const token = sessionStorage.getItem('vg_token');
+      if(token) {
+        try { await fetch('../php/api/logout.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }); } catch(e) {}
+      }
+      const authChannel = new BroadcastChannel('vg_auth_sync');
+      authChannel.postMessage('sync_users');
+      sessionStorage.removeItem('vg_token');
+      window.location.href = 'auth-login-basic.html';
+    }
 
     const activeTypes = [
       { type: 'Confined Space', class: 'danger', loc: 'Zone 12 - Reactor Tank V-101' },
@@ -486,6 +671,27 @@
     function toggleSidebar() {
       const sidebar = document.querySelector('.vg-sidebar');
       sidebar.classList.toggle('collapsed');
+      
+      const btnIcon = document.querySelector('.vg-header-left button i');
+      if (btnIcon) {
+        if (sidebar.classList.contains('collapsed')) {
+          btnIcon.className = 'bx bx-menu';
+          btnIcon.style.transform = 'rotate(0deg)';
+        } else {
+          btnIcon.className = 'bx bx-x';
+          btnIcon.style.transform = 'rotate(90deg)';
+        }
+      }
+    }
+
+    // Sidebar submenu logic
+    function toggleSubmenu(id) {
+      const el = document.getElementById(id);
+      if(el.style.display === 'none' || !el.style.display) {
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
     }
 
     // View Toggling Logic
@@ -501,6 +707,13 @@
         });
         navElement.classList.add('active');
         document.getElementById('main-header-title').innerText = navElement.innerText.trim() + ' | Manager Center';
+      }
+      
+      // Load Hierarchy Tree if the view is hierarchy-passwords
+      if (viewId === 'hierarchy-passwords') {
+        if (typeof loadOrgTree === 'function') {
+          loadOrgTree();
+        }
       }
     }
 
@@ -546,6 +759,10 @@
       });
       tbody.innerHTML = html;
       renderPagination('active-pagination', activePermitsData.length, activeItemsPerPage, activeCurrentPage, 'renderActivePermits');
+        
+        // Scroll the table wrapper up to top on page change
+        const tableWrapper = tbody.closest('.scrollable-table');
+        if (tableWrapper) tableWrapper.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // ----------------------------------------------------
@@ -626,6 +843,10 @@
       });
       tbody.innerHTML = html;
       renderPagination('history-pagination', historyPermitsData.length, historyItemsPerPage, historyCurrentPage, 'renderHistoryPermits');
+        
+        // Scroll the table wrapper up to top on page change
+        const tableWrapper = tbody.closest('.scrollable-table');
+        if (tableWrapper) tableWrapper.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // ----------------------------------------------------
@@ -672,12 +893,10 @@
       
       container.innerHTML = html;
 
-      // Scroll to top of table wrapper smoothly
-      if (currentPage > 1) {
-         const tableWrapper = container.previousElementSibling;
-         if(tableWrapper && tableWrapper.classList.contains('scrollable-table')) {
-           tableWrapper.scrollTop = 0;
-         }
+      // Scroll the main content area to top smoothly
+      const contentArea = document.querySelector('.vg-content-area');
+      if (contentArea) {
+        contentArea.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
@@ -746,13 +965,21 @@
           
           // Add to History Data Array
           const todayStr = new Date().toISOString().split('T')[0] + ' 18:30';
-          newlyApprovedPermits.unshift({
+          const newApprovalObj = {
             isDummy: false,
             permitId: permitId,
             typeBadge: typeBadge,
             loc: locationText,
-            date: todayStr
-          });
+            date: todayStr,
+            rowId: rowId
+          };
+          newlyApprovedPermits.unshift(newApprovalObj);
+          
+          let saved = JSON.parse(localStorage.getItem('vg_manager_approvals') || '[]');
+          if (!saved.some(s => s.permitId === permitId)) {
+            saved.push(newApprovalObj);
+            localStorage.setItem('vg_manager_approvals', JSON.stringify(saved));
+          }
           
           // Re-render the history if needed
           handleFilterChange();
@@ -763,6 +990,408 @@
         }, 300);
       }
     }
+
+    // Incident Reports Logic
+    function applyColumnFilters() {
+      if (!window.managerIncidents) return;
+      
+      const typeFilter = document.getElementById('filterType').value.toLowerCase();
+      const sevFilter = document.getElementById('filterSeverity').value.toLowerCase();
+      const locFilter = document.getElementById('filterLocation').value.toLowerCase();
+      const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
+      
+      const filtered = window.managerIncidents.filter(inc => {
+          const mType = (inc.type || '').toLowerCase();
+          const mSev = (inc.severity || '').toLowerCase();
+          const mLoc = (inc.plant || '').toLowerCase();
+          const mStat = (inc.status || 'open').toLowerCase();
+          
+          if (typeFilter && mType !== typeFilter) return false;
+          if (sevFilter && mSev !== sevFilter) return false;
+          if (locFilter && mLoc !== locFilter) return false;
+          if (statusFilter && mStat !== statusFilter) return false;
+          
+          return true;
+      });
+      
+      renderManagerIncidents(filtered);
+    }
+
+    function populateFilterOptions(data) {
+      if (!data) return;
+      const types = new Set();
+      const sevs = new Set();
+      const locs = new Set();
+      const stats = new Set();
+      
+      data.forEach(inc => {
+          if (inc.type) types.add(inc.type);
+          if (inc.severity) sevs.add(inc.severity);
+          if (inc.plant) locs.add(inc.plant);
+          if (inc.status) stats.add(inc.status);
+      });
+      
+      const updateSelect = (id, set, label) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const currentVal = el.value;
+          let html = `<option value="" style="background: #0f172a; color: #fff;">${label} (All)</option>`;
+          Array.from(set).sort().forEach(val => {
+              html += `<option value="${val}" style="background: #0f172a; color: #fff;">${val}</option>`;
+          });
+          el.innerHTML = html;
+          if (Array.from(set).includes(currentVal)) {
+              el.value = currentVal;
+          }
+      };
+      
+      updateSelect('filterType', types, 'Type');
+      updateSelect('filterSeverity', sevs, 'Severity');
+      updateSelect('filterLocation', locs, 'Plant');
+      updateSelect('filterStatus', stats, 'Status');
+    }
+
+    function renderManagerIncidents(data) {
+        const tbody = document.getElementById('incidents-body');
+        if (!data || data.length === 0) {
+          let activeFilter = 'All';
+          const activeBtn = document.querySelector('.vg-filter-btn.active');
+          if (activeBtn) activeFilter = activeBtn.innerText.trim();
+          tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--vg-text-muted);">No incidents found for filter: ${activeFilter}</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.map(inc => {
+          let sevColor = "var(--vg-status-info)";
+          if(inc.severity === "Critical") sevColor = "var(--vg-status-danger)";
+          if(inc.severity === "High") sevColor = "var(--vg-status-warning)";
+          if(inc.severity === "Low") sevColor = "var(--vg-text-muted)";
+          
+          let typeColor = "primary";
+          if(inc.type === "Accident") typeColor = "danger";
+          if(inc.type === "Near Miss") typeColor = "warning";
+          if(inc.type === "Hardware Failure") typeColor = "info";
+
+          const formattedDate = new Date(inc.timestamp).toLocaleString('en-GB', { 
+            day: '2-digit', month: 'short', year: 'numeric', 
+            hour: '2-digit', minute: '2-digit', hour12: true 
+          }).toUpperCase();
+
+          return `
+            <tr style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="openIncidentViewModal('${inc.id}')">
+              <td class="code-font" style="font-weight: 500;">${inc.id}</td>
+              <td class="code-font" style="color: var(--vg-accent-primary);">${formattedDate}</td>
+              <td><span class="vg-badge vg-badge-${typeColor}">${inc.type}</span></td>
+              <td style="color: ${sevColor}; font-weight: bold;">${inc.severity}</td>
+              <td>${inc.location}</td>
+              <td>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <span class="vg-badge">${inc.status || 'OPEN'}</span>
+                  <button class="vg-btn vg-btn-secondary vg-btn-sm" style="padding: 4px 8px;"><i class='bx bx-show'></i></button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+    }
+
+    async function loadIncidentReports(filterType = 'All') {
+      const tbody = document.getElementById('incidents-body');
+      tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--vg-text-muted);"><i class='bx bx-loader-alt bx-spin'></i> Loading incidents...</td></tr>`;
+      try {
+        const token = sessionStorage.getItem('vg_token');
+        const res = await fetch('../php/api/incidents.php', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const json = await res.json();
+        
+        if (!json.success) {
+          tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--vg-status-danger);">Error: ${json.message}</td></tr>`;
+          return;
+        }
+
+        let data = json.data;
+        if (filterType !== 'All') {
+          data = data.filter(inc => inc.type === filterType);
+        }
+
+        window.managerIncidents = data; // store globally for modal viewing
+        populateFilterOptions(data);
+        renderManagerIncidents(data);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--vg-status-danger);">Failed to connect to incident database.</td></tr>`;
+      }
+    }
+    
+    let currentViewIncidentId = null;
+
+    function openIncidentViewModal(id) {
+      currentViewIncidentId = id;
+      const inc = window.managerIncidents.find(i => i.id === id);
+      if (!inc) return;
+      
+      const formattedDate = new Date(inc.timestamp).toLocaleString('en-GB', { 
+        day: '2-digit', month: 'short', year: 'numeric', 
+        hour: '2-digit', minute: '2-digit', hour12: true 
+      }).toUpperCase();
+      
+      document.getElementById('incModalId').innerText = inc.id;
+      document.getElementById('incModalDate').innerText = formattedDate;
+      document.getElementById('incModalType').innerText = inc.type;
+      document.getElementById('incModalSeverity').innerText = inc.severity;
+      document.getElementById('incModalLocation').innerText = inc.location;
+      document.getElementById('incModalDesc').innerText = inc.description || 'No detailed description provided.';
+      
+      const statusSelect = document.getElementById('incModalStatusUpdate');
+      if(statusSelect) statusSelect.value = inc.status || 'Open';
+      
+      // Simulate photo attachment presence based on type/severity or mock data
+      const photoContainer = document.getElementById('incModalPhotoContainer');
+      // For demo, let's assume incidents with High/Critical severity have photos
+      if (inc.severity === 'High' || inc.severity === 'Critical') {
+        photoContainer.style.display = 'block';
+      } else {
+        photoContainer.style.display = 'none';
+      }
+      
+      document.getElementById('incidentViewModal').style.display = 'flex';
+    }
+
+    function closeIncidentViewModal() {
+      document.getElementById('incidentViewModal').style.display = 'none';
+    }
+
+    async function saveIncidentStatus() {
+      const selectEl = document.getElementById('incModalStatusUpdate');
+      if(!selectEl) return;
+      const newStatus = selectEl.value;
+      const btn = document.getElementById('saveStatusBtn');
+      if (btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Saving...";
+      
+      if (!currentViewIncidentId) {
+          if (btn) btn.innerHTML = "<i class='bx bx-save'></i> Save";
+          return;
+      }
+      
+      try {
+        const token = sessionStorage.getItem('vg_token');
+        const res = await fetch('../php/api/update-incident-status.php', {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ incident_id: currentViewIncidentId, status: newStatus })
+        });
+        const result = await res.json();
+        
+        // Always update local UI for fluidity even if backend is stubbed
+        const inc = window.managerIncidents.find(i => i.id === currentViewIncidentId);
+        if (inc) inc.status = newStatus;
+        
+        // Re-render directly without losing sort state
+        renderManagerIncidents(window.managerIncidents);
+        showToast('Incident status saved successfully!', true);
+        
+        if (!result.success) {
+           console.warn('Backend update warning: ' + result.message);
+        }
+      } catch (e) {
+        console.error('Update status error:', e);
+        const inc = window.managerIncidents.find(i => i.id === currentViewIncidentId);
+        if (inc) inc.status = newStatus;
+        
+        renderManagerIncidents(window.managerIncidents);
+        showToast('Incident status saved locally (Offline mode).', true);
+      }
+      
+      if (btn) btn.innerHTML = "<i class='bx bx-save'></i> Save";
+    }
+
+    // (Removed inline loadOrgTree, generateTreeHTML, renderNode, and toggleTreeNode as they are now in org-tree.js)
   </script>
+  
+  <!-- Incident View Modal -->
+  <div id="incidentViewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--vg-bg-surface); border:1px solid rgba(239, 68, 68, 0.3); border-radius:var(--vg-radius-lg); width:100%; max-width:700px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 30px 60px rgba(0,0,0,0.9);">
+      
+      <div style="padding:20px 24px; border-bottom:1px solid var(--vg-border); display:flex; justify-content:space-between; align-items:center; background: rgba(239, 68, 68, 0.1);">
+        <div>
+          <h3 style="font-family:var(--font-outfit); font-size:20px; font-weight:700; color: #ef4444; margin:0;"><i class='bx bx-error-alt'></i> Incident Investigation Report</h3>
+        </div>
+        <button onclick="closeIncidentViewModal()" style="background:transparent; border:none; color:var(--vg-text-secondary); cursor:pointer;"><i class='bx bx-x' style="font-size: 28px;"></i></button>
+      </div>
+
+      <div style="padding:24px; overflow-y:auto; flex:1; font-size:14px; color:var(--vg-text-secondary);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div>
+            <div style="font-size: 12px; color: var(--vg-text-muted);">Report ID</div>
+            <div id="incModalId" style="font-weight: 600; color: #fff; font-family: monospace; font-size: 16px;">INC-XXX</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--vg-text-muted);">Timestamp</div>
+            <div id="incModalDate" style="font-weight: 600; color: var(--vg-accent-primary);">--</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--vg-text-muted);">Category / Type</div>
+            <div id="incModalType" style="font-weight: 600; color: #fff;">--</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--vg-text-muted);">Severity Level</div>
+            <div id="incModalSeverity" style="font-weight: 600; color: #ef4444;">--</div>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <div style="font-size: 12px; color: var(--vg-text-muted);">Exact Location</div>
+            <div id="incModalLocation" style="font-weight: 600; color: #fff;">--</div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--vg-border); margin-bottom: 20px;">
+          <h4 style="font-family: var(--font-outfit); font-size: 15px; color: #fff; margin-bottom: 8px;">Description of Event</h4>
+          <p id="incModalDesc" style="line-height: 1.6;">No description provided.</p>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--vg-border); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+          <h4 style="font-family: var(--font-outfit); font-size: 15px; color: #fff; margin: 0;"><i class='bx bx-edit-alt'></i> Update Status</h4>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="incModalStatusUpdate" style="width: auto; min-width: 150px; padding: 8px 12px; background: rgba(15, 23, 42, 0.8); color: var(--text-white); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; font-family: var(--font-inter); outline: none; cursor: pointer; backdrop-filter: blur(4px);">
+              <option value="Open" style="background: #0f172a; color: #fff;">Open</option>
+              <option value="Investigating" style="background: #0f172a; color: #fbbf24;">Investigating</option>
+              <option value="Resolved" style="background: #0f172a; color: #10b981;">Resolved</option>
+            </select>
+            <button id="saveStatusBtn" onclick="saveIncidentStatus()" class="vg-btn vg-btn-primary" style="padding: 8px 16px;"><i class='bx bx-save'></i> Save</button>
+          </div>
+        </div>
+
+        <div id="incModalPhotoContainer" style="display: none; border-top: 1px dashed var(--vg-border); padding-top: 20px;">
+          <h4 style="font-family: var(--font-outfit); font-size: 15px; color: #fff; margin-bottom: 12px;"><i class='bx bx-camera'></i> Attached Evidence</h4>
+          <div style="width: 100%; max-width: 400px; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1);">
+             <!-- Mock evidence photo -->
+             <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&auto=format&fit=crop" style="width:100%; display:block;" alt="Evidence Photo" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- Manager Passport Modal (3D Flip) -->
+    <div id="managerPassportModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+      <div class="flip-card" id="managerFlipCard">
+        <div class="flip-card-inner" onclick="this.parentElement.classList.toggle('flipped')" style="cursor: pointer;">
+          <!-- FRONT SIDE -->
+          <div class="flip-card-front">
+            <div style="background: linear-gradient(135deg, var(--vg-accent-primary), #0a1128); padding: 24px; display: flex; align-items: center; gap: 20px; position: relative;">
+              <button onclick="closeManagerPassport(); event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;"><i class='bx bx-x'></i></button>
+              <img src="https://ui-avatars.com/api/?name=Manager&background=random&color=fff&size=80" style="border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" />
+              <div>
+                <h2 id="manager-passport-name" style="margin: 0; color: #fff; font-family: var(--font-outfit); font-size: 24px;">Executive Manager</h2>
+                <p style="margin: 4px 0 0; color: rgba(255,255,255,0.8); font-size: 14px;"><i class='bx bx-badge-check'></i> HOD Approver</p>
+              </div>
+            </div>
+            <div style="padding: 24px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div style="background: var(--vg-bg-main); padding: 12px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                  <div style="font-size: 12px; color: var(--vg-text-muted);">Assigned Plant</div>
+                  <div id="manager-passport-plant" style="font-weight: 600; font-size: 15px; color: var(--vg-text-primary); margin-top: 4px;">Plant A</div>
+                </div>
+                <div style="background: var(--vg-bg-main); padding: 12px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                  <div style="font-size: 12px; color: var(--vg-text-muted);">Approval Limit</div>
+                  <div style="font-weight: 600; font-size: 15px; color: var(--vg-status-warning); margin-top: 4px;"><i class='bx bxs-error-circle'></i> High-Risk</div>
+                </div>
+              </div>
+              
+              <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--vg-text-secondary); border-bottom: 1px solid var(--vg-border); padding-bottom: 8px;">Key Responsibilities</h4>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
+                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--vg-border);">
+                  <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Cross-Department Authorization</span>
+                  <span style="color: var(--vg-text-muted);">Active</span>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--vg-border);">
+                  <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Incident Report Escalation</span>
+                  <span style="color: var(--vg-text-muted);">Active</span>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 8px 0;">
+                  <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Operations Override</span>
+                  <span style="color: var(--vg-text-muted);">Level 2</span>
+                </li>
+              </ul>
+              <div style="text-align: center; margin-top: 15px; color: var(--vg-text-muted); font-size: 12px;">
+                 <i class='bx bx-rotate-right'></i> Tap anywhere to flip
+              </div>
+            </div>
+          </div>
+          <!-- BACK SIDE (QR CODE) -->
+          <div class="flip-card-back">
+            <button onclick="closeManagerPassport(); event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;"><i class='bx bx-x'></i></button>
+            <h3 style="color: #fff; font-family: var(--font-outfit); margin-bottom: 20px;">Digital Passport</h3>
+            <div class="qr-container" style="background: #fff; padding: 15px; border-radius: 12px;">
+              <img id="manager-qr-code" src="" alt="QR Code" width="200" height="200" />
+            </div>
+            <p style="color: rgba(255,255,255,0.7); text-align: center; font-size: 14px; margin-top: 15px;">Scan this QR code with any mobile device to verify the HOD Authorization details securely.</p>
+            <div style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.5); font-size: 12px;">
+                 <i class='bx bx-rotate-right'></i> Tap to flip back
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Heartbeat: Announce offline status on tab close/refresh without destroying session -->
+    <script>
+    function openManagerPassport() {
+      const name = localStorage.getItem('vg_user_name') || 'Executive Manager';
+      const plant = localStorage.getItem('vg_user_plant') || 'Plant A';
+      // Use email as UID (fallback for demo)
+      const email = localStorage.getItem('vg_user_email') || 'manager@visionguard.local';
+      
+      document.getElementById('manager-passport-name').innerText = name;
+      document.getElementById('manager-passport-plant').innerText = plant;
+      
+      const uid = btoa(email); // Base64 encode for simple obfuscation
+      
+      // Smart URL resolution for mobile access (preserves subdirectories and ports)
+      const a = document.createElement('a');
+      a.href = `../php/public/view-passport.php?uid=${uid}`;
+      let publicUrl = a.href;
+      
+      // Fallback for local network access if testing via localhost
+      publicUrl = publicUrl.replace('localhost', '192.168.29.18').replace('127.0.0.1', '192.168.29.18');
+      
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff5b35&color=fff&size=50`;
+      
+      document.getElementById('manager-qr-code').src = `https://quickchart.io/qr?text=${encodeURIComponent(publicUrl)}&size=200&ecLevel=H&centerImageUrl=${encodeURIComponent(avatarUrl)}`;
+      
+      document.getElementById('managerFlipCard').classList.remove('flipped'); // ensure front is showing
+      document.getElementById('managerPassportModal').style.display = 'flex';
+    }
+
+    function closeManagerPassport() {
+      document.getElementById('managerPassportModal').style.display = 'none';
+      setTimeout(() => document.getElementById('managerFlipCard').classList.remove('flipped'), 300);
+    }
+
+    window.addEventListener('pagehide', () => {
+      const authChannel = new BroadcastChannel('vg_auth_sync');
+      authChannel.postMessage('sync_users');
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        navigator.sendBeacon('../php/api/offline.php', new URLSearchParams({ token: token }));
+      }
+    });
+
+    async function handleLogout() {
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        try { await fetch('../php/api/logout.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }); } catch(e) {}
+      }
+      sessionStorage.removeItem('vg_token');
+      window.location.href = 'auth-login-basic.html';
+    }
+  </script>
+  
+  <!-- External Scripts -->
+  <script src="../assets/js/org-tree.js"></script>
 </body>
 </html>
+
+
+

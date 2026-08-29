@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Supervisor Portal | VisionGuard Operations</title>
+  <title>Field Supervisor Portal | VisionGuard</title>
   
   <link rel="stylesheet" href="../assets/css/visionguard.css" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
@@ -31,13 +34,13 @@
     .form-label-sm {
       display: block; font-size: 13px; font-weight: 600; color: var(--vg-text-secondary); margin-bottom: 6px;
     }
-    .form-input-sm {
+    .form-input-sm, .form-select-sm {
       width: 100%; padding: 10px 14px; font-size: 14px;
       background: var(--vg-bg-main); border: 1px solid var(--vg-border);
       border-radius: var(--vg-radius); color: var(--vg-text-primary);
       font-family: inherit; transition: all 0.2s;
     }
-    .form-input-sm:focus {
+    .form-input-sm:focus, .form-select-sm:focus {
       outline: none; border-color: var(--vg-accent-primary);
       box-shadow: 0 0 0 3px var(--vg-accent-glow);
     }
@@ -49,50 +52,211 @@
       cursor: crosshair;
       touch-action: none;
     }
+
+    .dashboard-view { display: none; }
+    .dashboard-view.active-view { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .clickable-card { cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; }
+    .clickable-card:hover { transform: translateY(-2px); border-color: var(--vg-accent-primary); }
+
+    .scrollable-table { overflow-y: auto; max-height: calc(100vh - 350px); }
+    .scrollable-table::-webkit-scrollbar { width: 6px; }
+    .scrollable-table::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    .scrollable-table::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    
+    .vg-table th { position: sticky; top: 0; background: #0f1629; z-index: 10; box-shadow: 0 1px 0 var(--vg-border); }
+
+    .muster-btn {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid #ef4444;
+      color: #ef4444;
+      font-size: 24px;
+      font-weight: 800;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .muster-btn:hover {
+      background: #ef4444;
+      color: #fff;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+    }
+    .muster-btn i { font-size: 48px; }
+
+  </style>
+  <style>
+    /* Mic Recording Animation */
+    @keyframes pulse-record {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .recording-active {
+      animation: pulse-record 1.5s infinite;
+      background-color: #ef4444 !important;
+      border-color: #ef4444 !important;
+      color: #fff !important;
+    }
+    /* Flip Card CSS */
+    .flip-card {
+      background-color: transparent;
+      width: 450px;
+      height: 520px;
+      perspective: 1000px;
+      margin: auto;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background: var(--vg-bg-surface);
+      border: 1px solid var(--vg-border);
+      border-radius: var(--vg-radius);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      text-align: left;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      background: linear-gradient(135deg, var(--vg-bg-surface), #0a1128);
+    }
+    .qr-container {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
 
   <div class="vg-app-shell">
     
-    <!-- Sidebar Navigation -->
-    <aside class="vg-sidebar">
-      <div class="vg-sidebar-brand">
-        <img src="../assets/img/new-logo.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
-        <span>VisionGuard</span>
-      </div>
-
-      <nav class="vg-sidebar-nav">
-        <a href="dashboard-supervisor.html" class="vg-nav-link active">
-          <i class='bx bx-hard-hat'></i> Field Operations
-        </a>
-      </nav>
-
-      <div class="vg-sidebar-user">
-        <div class="vg-user-info">
-          <h5>Field Supervisor</h5>
-          <p>Permit Initiator</p>
-        </div>
-        <a href="auth-login-basic.html" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
-          <i class='bx bx-log-out'></i>
+    <!-- Global Header -->
+    <header class="vg-header">
+      <div class="vg-header-left">
+        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="margin-left: -8px; border-radius: 50%; width: 38px; height: 38px; padding: 0; background: transparent; border: none; font-size: 24px; color: var(--vg-text-primary);" title="Toggle Menu">
+          <i class='bx bx-menu' style="transition: transform 0.2s ease;"></i>
+        </button>
+        <a href="dashboard-supervisor.html" class="vg-header-brand">
+          <img src="../assets/img/new-logo.png" alt="Logo" style="height: 28px;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
+          <span>VisionGuard</span>
         </a>
       </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      
-      <header class="vg-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
         <div class="vg-header-title">
-          <h2>Field Operations & Permit Generator</h2>
+          <h2 id="main-header-title">Permit Initialization | Field Supervisor</h2>
         </div>
-      </header>
+        <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
+          <i class='bx bx-arrow-back'></i>
+        </button>
+      </div>
+    </header>
 
+    <div class="vg-app-body">
+      <!-- Sidebar Navigation -->
+      <aside class="vg-sidebar">
+        <nav class="vg-sidebar-nav" style="margin-top: 12px;">
+          <a href="javascript:void(0)" onclick="switchView('view-initiate', this)" class="vg-nav-link active">
+            <i class='bx bx-plus-circle'></i> <span class="vg-nav-link-text">Initiate Permit</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('view-active', this)" class="vg-nav-link">
+            <i class='bx bx-list-check'></i> <span class="vg-nav-link-text">My Active Permits</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('view-pending', this)" class="vg-nav-link">
+            <i class='bx bx-time'></i> <span class="vg-nav-link-text">Pending / Rejected</span>
+          </a>
+          <div style="margin: 16px 0; border-top: 1px solid var(--vg-border);"></div>
+          
+          <div style="padding: 0 16px 8px; font-size: 11px; text-transform: uppercase; color: var(--vg-text-muted); font-weight: 700; letter-spacing: 1px;" class="vg-nav-link-text">Field Tools</div>
+          <a href="javascript:void(0)" onclick="switchView('view-incident', this)" class="vg-nav-link">
+            <i class='bx bx-error-alt'></i> <span class="vg-nav-link-text">Near Miss / Incident</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('view-competency', this)" class="vg-nav-link">
+            <i class='bx bx-id-card'></i> <span class="vg-nav-link-text">Worker Competency</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('view-gas', this); if(typeof loadGasLogs === 'function') loadGasLogs();" class="vg-nav-link">
+            <i class='bx bx-wind'></i> <span class="vg-nav-link-text">Gas Monitor Log</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('org-tree-view', this); loadOrgTree();" class="vg-nav-link" title="Organization Hierarchy">
+            <i class='bx bx-network-chart'></i> <span class="vg-nav-link-text">Org Hierarchy</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('view-emergency', this)" class="vg-nav-link" style="color: #ef4444;">
+            <i class='bx bx-alarm-exclamation'></i> <span class="vg-nav-link-text">Emergency Muster</span>
+          </a>
+        </nav>
+
+        <div class="vg-sidebar-user">
+          <div class="vg-user-info" onclick="openSupervisorPassport()" style="cursor: pointer; width: 100%;" title="View Supervisor Passport">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="https://ui-avatars.com/api/?name=Supervisor&background=ff5b35&color=fff&size=40" style="border-radius: 50%; width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.2);" />
+              <div>
+                <h5 id="ui-user-name" style="margin: 0;">Field Supervisor</h5>
+                <p id="ui-user-plant" style="margin: 0;">Permit Initiator</p>
+              </div>
+            </div>
+          </div>
+          <a href="#" onclick="handleLogout()" class="logout-btn" style="color: var(--vg-status-danger); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; text-decoration: none;" title="Sign Out" onmouseover="this.style.transform='scale(1.1)'; this.style.color='#ff3b3b';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--vg-status-danger)';">
+            <i class='bx bx-power-off'></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
       <main class="vg-content-area">
         
-        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px;">
-          
-          <!-- Left Column: Initiate Combined PTW Form -->
+        <!-- Summary Metrics (Always Visible) -->
+        <div class="vg-grid-4">
+          <div class="vg-card clickable-card" onclick="filterActivePermits('All', document.querySelectorAll('.vg-nav-link')[1])">
+            <div class="vg-metric-title">Active Operations</div>
+            <div class="vg-metric-value" style="color: var(--vg-status-success);">2</div>
+          </div>
+          <div class="vg-card clickable-card" onclick="switchView('view-pending', document.querySelectorAll('.vg-nav-link')[2])">
+            <div class="vg-metric-title">Pending Approvals</div>
+            <div class="vg-metric-value" style="color: var(--vg-status-warning);">2</div>
+          </div>
+          <div class="vg-card clickable-card" onclick="switchView('view-incident', document.querySelectorAll('.vg-nav-link')[4])">
+            <div class="vg-metric-title">Near Misses Today</div>
+            <div class="vg-metric-value" style="color: var(--vg-accent-primary);">0</div>
+          </div>
+          <div class="vg-card clickable-card" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);" onclick="filterActivePermits('High', document.querySelectorAll('.vg-nav-link')[1])">
+            <div class="vg-metric-title">High Risk (Ongoing)</div>
+            <div class="vg-metric-value" style="color: var(--vg-status-danger);">1</div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: INITIATE PERMIT (DEFAULT)          -->
+        <!-- ========================================== -->
+        <div id="view-initiate" class="dashboard-view active-view">
           <div class="vg-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
               <h3 style="font-family: var(--font-outfit); font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
@@ -102,59 +266,80 @@
             </div>
 
             <form id="formInitiatePermit" onsubmit="handleCreatePermit(event)">
-              
-              <!-- Category Selector Cards -->
               <div class="form-group-sm">
                 <label class="form-label-sm">Select Applicable Permit Categories (Supports Combined Scopes):</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                   <label class="permit-cb-card">
-                    <input class="permit-type-cb" type="checkbox" value="Confined Space" id="cb_cs" checked />
-                    <span style="font-size: 13px; font-weight: 500;">Confined Space Entry</span>
+                    <input class="permit-type-cb" type="checkbox" value="Confined Space" checked />
+                    <span style="font-size: 13px; font-weight: 500;">Confined Space</span>
                   </label>
                   <label class="permit-cb-card">
-                    <input class="permit-type-cb" type="checkbox" value="Excavation" id="cb_ex" />
+                    <input class="permit-type-cb" type="checkbox" value="Excavation" />
                     <span style="font-size: 13px; font-weight: 500;">Excavation (>1.5m)</span>
                   </label>
                   <label class="permit-cb-card">
-                    <input class="permit-type-cb" type="checkbox" value="Electrical Work" id="cb_el" />
-                    <span style="font-size: 13px; font-weight: 500;">Electrical Work / LOTO</span>
+                    <input class="permit-type-cb" type="checkbox" value="Electrical Work" />
+                    <span style="font-size: 13px; font-weight: 500;">Electrical / LOTO</span>
                   </label>
                   <label class="permit-cb-card">
-                    <input class="permit-type-cb" type="checkbox" value="Fragile Roof" id="cb_rf" />
-                    <span style="font-size: 13px; font-weight: 500;">Work at Height / Roof</span>
+                    <input class="permit-type-cb" type="checkbox" value="Hot Work" />
+                    <span style="font-size: 13px; font-weight: 500;">Hot Work</span>
+                  </label>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Cold Work" />
+                    <span style="font-size: 13px; font-weight: 500;">Cold Work</span>
+                  </label>
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Work at Height" />
+                    <span style="font-size: 13px; font-weight: 500;">Work at Height</span>
+                  </label>
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Fragile Roof" />
+                    <span style="font-size: 13px; font-weight: 500;">Fragile Roof</span>
+                  </label>
+                  <label class="permit-cb-card">
+                    <input class="permit-type-cb" type="checkbox" value="Radiography" />
+                    <span style="font-size: 13px; font-weight: 500;">Radiography</span>
                   </label>
                 </div>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="form-group-sm">
-                  <label class="form-label-sm" for="job_type">Job Type / Reference</label>
-                  <input type="text" class="form-input-sm" id="job_type" value="MOC / PM / Project" required />
+                  <label class="form-label-sm">Job Type / Reference</label>
+                  <input type="text" class="form-input-sm" id="job_type" value="Maintenance PM-1042" required />
                 </div>
                 <div class="form-group-sm">
-                  <label class="form-label-sm" for="equipment">Equipment / Tag No.</label>
+                  <label class="form-label-sm">Equipment / Tag No.</label>
                   <input type="text" class="form-input-sm" id="equipment" value="Reactor Vessel V-101" required />
                 </div>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
                 <div class="form-group-sm">
-                  <label class="form-label-sm" for="from_dept">From Dept</label>
+                  <label class="form-label-sm">From Dept</label>
                   <input type="text" class="form-input-sm" id="from_dept" value="Operations" required />
                 </div>
                 <div class="form-group-sm">
-                  <label class="form-label-sm" for="to_dept">To Dept</label>
+                  <label class="form-label-sm">To Dept</label>
                   <input type="text" class="form-input-sm" id="to_dept" value="Maintenance" required />
                 </div>
                 <div class="form-group-sm">
-                  <label class="form-label-sm" for="location">Location / Zone</label>
+                  <label class="form-label-sm">Location / Zone</label>
                   <input type="text" class="form-input-sm" id="location" value="Zone 12 - Unit 01" required />
                 </div>
               </div>
 
               <div class="form-group-sm">
-                <label class="form-label-sm" for="description">Detailed Work Scope Description</label>
-                <textarea class="form-input-sm" id="description" rows="3" required>Internal steam cleaning, chemical residue removal, and wall thickness inspection.</textarea>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;">
+                  <label class="form-label-sm" style="margin-bottom: 0;">Detailed Work Scope Description</label>
+                  <button type="button" id="mic-btn" class="vg-btn vg-btn-secondary vg-btn-sm" onclick="startSpeechRecognition()" title="Dictate Description (Hinglish Supported)" style="padding: 4px 8px; font-size: 16px; border-radius: 4px; transition: all 0.3s;">
+                    <i class='bx bx-microphone'></i>
+                  </button>
+                </div>
+                <textarea class="form-input-sm" id="description" style="resize: none; overflow: hidden; min-height: 80px;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" required>Internal steam cleaning, chemical residue removal, and wall thickness inspection.</textarea>
               </div>
 
               <!-- AI JSA Trigger Box -->
@@ -173,7 +358,20 @@
                 <div id="jsa-preview-box" style="display:none; margin-top: 12px; font-size: 13px;"></div>
               </div>
 
-              <!-- Signature Canvas -->
+              <!-- Integrated TBT Section -->
+              <div style="border-top: 1px dashed var(--vg-border); padding-top: 20px; margin-top: 20px; margin-bottom: 20px;">
+                <h4 style="font-family: var(--font-outfit); font-size: 16px; margin-bottom: 12px; color: var(--vg-accent-primary);">
+                  <i class='bx bx-group'></i> Pre-Job Toolbox Talk (TBT) & Attendance
+                </h4>
+                <div class="form-group-sm">
+                  <label class="form-label-sm">Number of Workers Required for Job</label>
+                  <input type="number" class="form-input-sm" id="tbt_worker_count" value="0" min="0" onchange="generateWorkerDropdowns()" style="width: 100px;" />
+                </div>
+                <div id="tbt-attendance-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <!-- Dropdowns generated here dynamically -->
+                </div>
+              </div>
+
               <div class="form-group-sm">
                 <label class="form-label-sm"><i class='bx bx-pencil' style="color: var(--vg-status-warning);"></i> Digital Signature Canvas (Issuer Sign-off):</label>
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
@@ -183,38 +381,671 @@
               </div>
 
               <button type="submit" class="vg-btn vg-btn-primary" style="width: 100%; padding: 14px; font-size: 15px;">
-                Submit Combined Permit for Safety Review &rarr;
+                Submit Combined Permit & TBT Record &rarr;
               </button>
             </form>
           </div>
+        </div>
 
-          <!-- Right Column: Active & Submitted Permits Queue -->
-          <div class="vg-card">
-            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-              <i class='bx bx-list-check' style="color: var(--vg-status-warning);"></i> Active & Submitted Permits
-            </h3>
-            <div id="permits-list">
-              <div style="text-align: center; padding: 40px; color: var(--vg-text-muted);"><i class='bx bx-loader-alt bx-spin' style="font-size: 24px;"></i><br>Fetching active permits...</div>
+        <!-- ========================================== -->
+        <!-- VIEW 2: ACTIVE PERMITS                     -->
+        <!-- ========================================== -->
+        <div id="view-active" class="dashboard-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center; background: var(--vg-bg-surface);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
+                <i class='bx bx-list-check' style="color: var(--vg-status-success);"></i> My Active Field Operations - <span id='ui-plant-title' style='color:var(--vg-accent-primary)'></span>
+              </h3>
+            </div>
+            <div class="vg-table-wrapper scrollable-table">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Permit ID</th>
+                    <th>Category</th>
+                    <th>Risk</th>
+                    <th>Location / Equipment</th>
+                    <th>Workers</th>
+                    <th>Time Left</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="active-tbody">
+                  <tr>
+                    <td class="code-font">PTW-202608-5501</td>
+                    <td><span class="vg-badge vg-badge-danger">Confined Space</span></td>
+                    <td><span style="color: #ef4444; font-weight: bold;"><i class='bx bx-error'></i> High</span></td>
+                    <td>Zone 12 - Reactor Tank</td>
+                    <td>4 Pax</td>
+                    <td><span style="color: #ef4444; font-weight: bold;">01:45</span></td>
+                    <td>
+                      <a href="permit-view.html?id=PTW-202608-5501" target="_blank" class="vg-btn vg-btn-primary vg-btn-sm" style="margin-right: 4px;">View</a>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="showToast('Extension requested.')">Extend</button>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" style="color: var(--vg-status-danger); border-color: var(--vg-status-danger);" onclick="showToast('Closure process initiated.')">Close</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">PTW-202608-5502</td>
+                    <td><span class="vg-badge vg-badge-accent">Hot Work</span></td>
+                    <td><span style="color: var(--vg-status-warning); font-weight: bold;">Medium</span></td>
+                    <td>Zone 02 - Flare Stack B</td>
+                    <td>2 Pax</td>
+                    <td>04:30</td>
+                    <td>
+                      <a href="permit-view.html?id=PTW-202608-5502" target="_blank" class="vg-btn vg-btn-primary vg-btn-sm" style="margin-right: 4px;">View</a>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="showToast('Extension requested.')">Extend</button>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" style="color: var(--vg-status-danger); border-color: var(--vg-status-danger);" onclick="showToast('Closure process initiated.')">Close</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
 
+        <!-- ========================================== -->
+        <!-- VIEW 3: PENDING & REJECTED                 -->
+        <!-- ========================================== -->
+        <div id="view-pending" class="dashboard-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border);">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
+                <i class='bx bx-time' style="color: var(--vg-status-warning);"></i> Pending & Rejected Permits
+              </h3>
+            </div>
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Permit ID</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="code-font">PTW-202608-5590</td>
+                    <td><span class="vg-badge vg-badge-warning">Excavation</span></td>
+                    <td><span class="vg-badge vg-badge-warning">Pending Manager</span></td>
+                    <td>Awaiting HOD sign-off.</td>
+                    <td><button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="showToast('Nudge sent to Manager (manager@visionguard.local) via Email.', true)"><i class='bx bx-bell'></i> Nudge</button></td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">PTW-202608-5591</td>
+                    <td><span class="vg-badge vg-badge-danger">Electrical</span></td>
+                    <td><span class="vg-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444;">Rejected (Safety)</span></td>
+                    <td>LOTO tags missing in photos.</td>
+                    <td><button class="vg-btn vg-btn-primary vg-btn-sm" onclick="showToast('Revision started. Safety Officer will be notified upon resubmission.', true)">Revise Form</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: INCIDENT / NEAR MISS               -->
+        <!-- ========================================== -->
+        <div id="view-incident" class="dashboard-view">
+          <div class="vg-card" style="border-color: rgba(239, 68, 68, 0.3);">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--vg-status-danger);">
+              <i class='bx bx-error-alt'></i> Report Near Miss / Incident
+            </h3>
+            <form id="formReportIncident" onsubmit="submitIncident(event)">
+              <div class="form-group-sm">
+                <label class="form-label-sm">Incident Type</label>
+                <select id="incident-type" class="form-select-sm" required>
+                  <option value="Near Miss">Near Miss (No injury)</option>
+                  <option value="First Aid Case">First Aid Case</option>
+                  <option value="Equipment Damage">Equipment Damage</option>
+                  <option value="Spill / Environmental">Spill / Environmental</option>
+                </select>
+              </div>
+              <div class="form-group-sm">
+                <label class="form-label-sm">Severity</label>
+                <select id="incident-severity" class="form-select-sm" required>
+                  <option value="Low">Low (No downtime)</option>
+                  <option value="Medium">Medium (Minor disruption)</option>
+                  <option value="High">High (Major disruption)</option>
+                  <option value="Critical">Critical (Fatal / Catastrophic)</option>
+                </select>
+              </div>
+              <div class="form-group-sm">
+                <label class="form-label-sm">Location</label>
+                <input type="text" class="form-input-sm" id="incident-location" placeholder="Exact location..." required />
+              </div>
+              <div class="form-group-sm">
+                <label class="form-label-sm">Description of Event</label>
+                <textarea class="form-input-sm" id="incident-description" rows="4" placeholder="What happened? What were the immediate actions taken?" required></textarea>
+              </div>
+              <div class="form-group-sm" style="border: 1px dashed rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
+                <p style="font-size: 13px; color: var(--vg-text-muted); margin-bottom: 10px;">Attach Evidence (Optional)</p>
+                <input type="file" id="incident-photo" accept="image/*" style="display: none;" onchange="showToast('Photo selected successfully.', true)" />
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                  <button type="button" class="vg-btn vg-btn-secondary vg-btn-sm" onclick="document.getElementById('incident-photo').setAttribute('capture', 'environment'); document.getElementById('incident-photo').click();">
+                    <i class='bx bx-camera'></i> Camera
+                  </button>
+                  <button type="button" class="vg-btn vg-btn-secondary vg-btn-sm" onclick="document.getElementById('incident-photo').removeAttribute('capture'); document.getElementById('incident-photo').click();">
+                    <i class='bx bx-upload'></i> Upload
+                  </button>
+                </div>
+              </div>
+              <button type="submit" class="vg-btn vg-btn-primary" style="background: #ef4444; color: white; border-color: #ef4444; width: 100%; padding: 12px;">
+                <i class='bx bx-paper-plane'></i> Submit Report Immediately
+              </button>
+            </form>
+          </div>
+          
+          <div class="vg-card" style="margin-top: 20px;">
+            <h4 style="font-family: var(--font-outfit); font-size: 16px; margin-bottom: 15px;">
+              <i class='bx bx-history'></i> My Reported Incidents
+            </h4>
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Date/Time</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Location</th>
+                  </tr>
+                </thead>
+                <tbody id="incident-history-tbody">
+                  <!-- History populated dynamically -->
+                  <tr><td colspan="4" style="text-align: center; color: var(--vg-text-muted);">No incidents reported yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 6: WORKER COMPETENCY                  -->
+        <!-- ========================================== -->
+        <div id="view-competency" class="dashboard-view">
+          <div class="vg-card">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 20px;">
+              <i class='bx bx-id-card' style="color: var(--vg-accent-primary);"></i> Worker Competency Lookup
+            </h3>
+            <p style="font-size: 13px; color: var(--vg-text-muted); margin-bottom: 16px;">Enter Worker ID to verify training validity before assigning high-risk tasks.</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+              <input type="text" class="form-input-sm" id="worker_id" placeholder="Scan or Enter ID (e.g. W-1002)" />
+              <button class="vg-btn vg-btn-primary" onclick="lookupWorker()"><i class='bx bx-search'></i> Verify ID</button>
+              <button class="vg-btn vg-btn-secondary" onclick="openMockQrScanner()"><i class='bx bx-qr-scan'></i> Scan QR</button>
+            </div>
+
+            <div id="worker-result" style="display: none; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--vg-radius); margin-bottom: 20px;">
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 60px; height: 60px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px;"><i class='bx bx-user'></i></div>
+                <div>
+                  <h4 id="worker-res-name" style="margin: 0; color: #fff;">Ramesh Kumar (W-1002)</h4>
+                  <p id="worker-res-skills" style="margin: 4px 0 0; font-size: 13px; color: #10b981;"><i class='bx bx-check-circle'></i> Cleared for: Confined Space, Hot Work</p>
+                  <p style="margin: 2px 0 0; font-size: 12px; color: var(--vg-text-muted);">Digital Passport Verified</p>
+                </div>
+              </div>
+            </div>
+
+            <h4 style="font-family: var(--font-outfit); font-size: 16px; margin-bottom: 15px; border-top: 1px solid var(--vg-border); padding-top: 20px;">
+              <i class='bx bx-group'></i> Workers Under My Supervision
+            </h4>
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Worker ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="code-font">W-1001</td><td>Ajay Singh</td><td>Welder</td><td><span style="color: var(--vg-status-success);">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">W-1002</td><td>Ramesh Kumar</td><td>Fitter</td><td><span style="color: var(--vg-status-success);">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">W-1003</td><td>Sunil Das</td><td>Helper</td><td><span style="color: var(--vg-status-success);">Active</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 7: GAS MONITOR LOG                    -->
+        <!-- ========================================== -->
+        <div id="view-gas" class="dashboard-view">
+          <div class="vg-card">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 20px;">
+              <i class='bx bx-wind' style="color: var(--vg-status-info);"></i> Log Gas Readings
+            </h3>
+            <form id="formGasMonitor" onsubmit="submitGasLog(event)">
+              <div class="form-group-sm">
+                <label class="form-label-sm">Select Active Confined Space Permit</label>
+                <select id="gas-permit-id" class="form-select-sm">
+                  <option value="PTW-202608-5501">PTW-202608-5501 (Reactor Tank V-101)</option>
+                </select>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                <div class="form-group-sm">
+                  <label class="form-label-sm">Oxygen (O2) %</label>
+                  <input type="number" step="0.1" id="gas-o2" class="form-input-sm" value="20.9" required />
+                </div>
+                <div class="form-group-sm">
+                  <label class="form-label-sm">LEL %</label>
+                  <input type="number" step="0.1" id="gas-lel" class="form-input-sm" value="0" required />
+                </div>
+                <div class="form-group-sm">
+                  <label class="form-label-sm">H2S ppm</label>
+                  <input type="number" step="0.1" id="gas-h2s" class="form-input-sm" value="0" required />
+                </div>
+              </div>
+              <button type="submit" class="vg-btn vg-btn-primary"><i class='bx bx-save'></i> Save Log Entry</button>
+            </form>
+          </div>
+          
+          <div class="vg-card" style="margin-top: 20px;">
+            <h4 style="font-family: var(--font-outfit); font-size: 16px; margin-bottom: 15px;">
+              <i class='bx bx-history'></i> Recent Gas Monitor Logs
+            </h4>
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Permit ID</th>
+                    <th>O2 %</th>
+                    <th>LEL %</th>
+                    <th>H2S ppm</th>
+                  </tr>
+                </thead>
+                <tbody id="gas-log-tbody">
+                  <!-- Gas logs populated here -->
+                  <tr><td colspan="5" style="text-align: center; color: var(--vg-text-muted);">No logs recorded today.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 8: EMERGENCY MUSTER                   -->
+        <!-- ========================================== -->
+        <div id="view-emergency" class="dashboard-view">
+          <div class="vg-card" style="text-align: center; padding: 60px 20px;">
+            <button class="muster-btn" onclick="triggerMuster()">
+              <i class='bx bx-alarm-exclamation bx-tada'></i>
+              Trigger Emergency Muster
+            </button>
+            <p style="margin-top: 20px; color: var(--vg-text-muted); font-size: 14px;">
+              This will instantly alert the control room and push a notification to all active field workers in your zone to evacuate to the assembly point.
+            </p>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 9: ORG HIERARCHY                      -->
+        <!-- ========================================== -->
+        <div id="org-tree-view" class="dashboard-view">
+          <div class="vg-card">
+            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin-bottom: 20px;">
+              <i class='bx bx-network-chart' style="color: var(--vg-accent-primary);"></i> Organization Hierarchy
+            </h3>
+            <div id="org-tree-container">
+               <!-- Tree will be loaded here -->
+            </div>
+          </div>
         </div>
 
       </main>
     </div>
+  </div>
 
+  <!-- Notification Toast -->
+  <div id="toast" style="display:none; position: fixed; bottom: 30px; right: 30px; background: rgba(16, 185, 129, 0.9); color: #fff; padding: 16px 24px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 600; z-index: 10000; align-items: center; gap: 10px; backdrop-filter: blur(10px); border: 1px solid #10b981; transition: opacity 0.3s;">
+    <i class='bx bx-check-circle' style="font-size: 24px;" id="toastIcon"></i>
+    <span id="toastMsg">Action successful</span>
+  </div>
+
+  <!-- Supervisor Passport Modal (3D Flip) -->
+  <div id="passportModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div class="flip-card" id="supervisorFlipCard">
+      <div class="flip-card-inner" onclick="this.parentElement.classList.toggle('flipped')" style="cursor: pointer;">
+        <!-- FRONT SIDE -->
+        <div class="flip-card-front">
+          <div style="background: linear-gradient(135deg, var(--vg-accent-primary), #0a1128); padding: 24px; display: flex; align-items: center; gap: 20px; position: relative;">
+            <button onclick="closeSupervisorPassport(); event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;"><i class='bx bx-x'></i></button>
+            <img src="https://ui-avatars.com/api/?name=Supervisor&background=random&color=fff&size=80" style="border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" />
+            <div>
+              <h2 id="passport-name" style="margin: 0; color: #fff; font-family: var(--font-outfit); font-size: 24px;">Deepak Kumar</h2>
+              <p style="margin: 4px 0 0; color: rgba(255,255,255,0.8); font-size: 14px;"><i class='bx bx-badge-check'></i> Field Supervisor</p>
+            </div>
+          </div>
+          <div style="padding: 24px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+              <div style="background: var(--vg-bg-main); padding: 12px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                <div style="font-size: 12px; color: var(--vg-text-muted);">Assigned Plant</div>
+                <div id="passport-plant" style="font-weight: 600; font-size: 15px; color: var(--vg-text-primary); margin-top: 4px;">Plant A</div>
+              </div>
+              <div style="background: var(--vg-bg-main); padding: 12px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                <div style="font-size: 12px; color: var(--vg-text-muted);">Safety Rating</div>
+                <div style="font-weight: 600; font-size: 15px; color: var(--vg-status-success); margin-top: 4px;"><i class='bx bxs-star'></i> 4.8 / 5.0</div>
+              </div>
+            </div>
+            
+            <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--vg-text-secondary); border-bottom: 1px solid var(--vg-border); padding-bottom: 8px;">Competencies & Validities</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
+              <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--vg-border);">
+                <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Advanced PTW Issuance</span>
+                <span style="color: var(--vg-text-muted);">Valid: 2027</span>
+              </li>
+              <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--vg-border);">
+                <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Confined Space Rescue</span>
+                <span style="color: var(--vg-text-muted);">Valid: 2026</span>
+              </li>
+              <li style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span><i class='bx bx-check-circle' style="color: #10b981;"></i> First Aid Level 3</span>
+                <span style="color: var(--vg-text-muted);">Valid: 2028</span>
+              </li>
+            </ul>
+            <div style="text-align: center; margin-top: 15px; color: var(--vg-text-muted); font-size: 12px;">
+                 <i class='bx bx-rotate-right'></i> Tap anywhere to flip
+            </div>
+          </div>
+        </div>
+        <!-- BACK SIDE (QR CODE) -->
+        <div class="flip-card-back">
+          <button onclick="closeSupervisorPassport(); event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;"><i class='bx bx-x'></i></button>
+          <h3 style="color: #fff; font-family: var(--font-outfit); margin-bottom: 20px;">Digital Passport</h3>
+          <div class="qr-container" style="background: #fff; padding: 15px; border-radius: 12px;">
+            <img id="supervisor-qr-code" src="" alt="QR Code" width="200" height="200" />
+          </div>
+          <p style="color: rgba(255,255,255,0.7); text-align: center; font-size: 14px; margin-top: 15px;">Scan this QR code with any mobile device to verify Supervisor Competencies securely.</p>
+          <div style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.5); font-size: 12px;">
+                 <i class='bx bx-rotate-right'></i> Tap to flip back
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="../assets/js/signature-canvas.js"></script>
+  <script src="../assets/js/org-tree.js"></script>
   <script>
     let initiatorSigPad;
-    window.addEventListener('DOMContentLoaded', () => {
-      initiatorSigPad = new SignaturePad('sig-canvas-initiator', 'btn-clear-sig');
+    let currentUserData = null;
+    
+    // Auth Check
+    document.addEventListener("DOMContentLoaded", () => {
+      // Add validation listeners to checkboxes
+      document.querySelectorAll('.permit-type-cb').forEach(cb => {
+        cb.addEventListener('change', validateCheckboxes);
+      });
+      validateCheckboxes();
+
+      const vgToken = sessionStorage.getItem('vg_token');
+      if (!vgToken) { window.location.href = 'auth-login-basic.html'; return; }
+      
+      // Fetch user plant & operators
+      fetch('../php/api/me.php', { headers: { 'Authorization': 'Bearer ' + vgToken } })
+        .then(r => r.json())
+        .then(res => {
+          if(!res.success) { handleLogout(); return; }
+          currentUserData = res.user;
+          const plant = res.user.plant_assigned || 'Global Plant';
+          
+          document.getElementById('ui-user-name').innerText = res.user.role || 'Supervisor';
+          document.getElementById('ui-user-plant').innerText = 'Assigned: ' + plant;
+          
+          if(document.getElementById('ui-plant-title')) {
+              document.getElementById('ui-plant-title').innerText = plant;
+          }
+          if(document.getElementById('incident-location')) {
+              document.getElementById('incident-location').value = plant + ' - ';
+          }
+          if(document.getElementById('passport-name')) {
+              document.getElementById('passport-name').innerText = res.user.email.split('@')[0];
+              document.getElementById('passport-plant').innerText = plant;
+          }
+        });
+
+      if(document.getElementById('sig-canvas-initiator')) {
+        initiatorSigPad = new SignaturePad('sig-canvas-initiator', 'btn-clear-sig');
+      }
     });
 
+    async function handleLogout() {
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        try { await fetch('../php/api/logout.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }); } catch(e) {}
+      }
+      sessionStorage.removeItem('vg_token');
+      window.location.href = 'auth-login-basic.html';
+    }
+
+    // Sidebar Toggle Logic
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.vg-sidebar');
+      sidebar.classList.toggle('collapsed');
+      
+      const btnIcon = document.querySelector('.vg-header-left button i');
+      if (btnIcon) {
+        if (sidebar.classList.contains('collapsed')) {
+          btnIcon.className = 'bx bx-menu';
+          btnIcon.style.transform = 'rotate(0deg)';
+        } else {
+          btnIcon.className = 'bx bx-x';
+          btnIcon.style.transform = 'rotate(90deg)';
+        }
+      }
+    }
+
+    function switchView(viewId, navElement) {
+      document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active-view'));
+      document.getElementById(viewId).classList.add('active-view');
+      
+      if(navElement) {
+        document.querySelectorAll('.vg-nav-link').forEach(l => l.classList.remove('active'));
+        navElement.classList.add('active');
+          if(window.innerWidth <= 768) { document.querySelector('.vg-sidebar').classList.add('collapsed'); }
+        document.getElementById('main-header-title').innerText = navElement.querySelector('.vg-nav-link-text').innerText + ' | Field Supervisor';
+      }
+    }
+
+    function filterActivePermits(riskLevel, navElement) {
+      switchView('view-active', navElement);
+      const rows = document.querySelectorAll('#active-tbody tr');
+      rows.forEach(row => {
+        const riskCell = row.cells[2].innerText;
+        if (riskLevel === 'All' || riskCell.includes(riskLevel)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // UI Helpers
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = message;
+      
+      if(isSuccess) {
+        toast.style.background = 'rgba(16, 185, 129, 0.9)'; toast.style.borderColor = '#10b981';
+        document.getElementById('toastIcon').className = 'bx bx-check-circle';
+      } else {
+        toast.style.background = 'rgba(239, 68, 68, 0.9)'; toast.style.borderColor = '#ef4444';
+        document.getElementById('toastIcon').className = 'bx bx-error-circle';
+      }
+      
+      toast.style.display = 'flex';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // Passport Modals
+    function openSupervisorPassport() {
+      const email = currentUserData ? currentUserData.email : 'supervisor@visionguard.local';
+      const name = currentUserData ? currentUserData.name : 'Deepak Kumar';
+      
+      const uid = btoa(email); // Base64 encode for simple obfuscation
+      
+      // Smart URL resolution for mobile access (preserves subdirectories and ports)
+      const a = document.createElement('a');
+      a.href = `../php/public/view-passport.php?uid=${uid}`;
+      let publicUrl = a.href;
+      
+      // Fallback for local network access if testing via localhost
+      publicUrl = publicUrl.replace('localhost', '192.168.29.18').replace('127.0.0.1', '192.168.29.18');
+      
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff5b35&color=fff&size=50`;
+      
+      document.getElementById('supervisor-qr-code').src = `https://quickchart.io/qr?text=${encodeURIComponent(publicUrl)}&size=200&ecLevel=H&centerImageUrl=${encodeURIComponent(avatarUrl)}`;
+      
+      document.getElementById('supervisorFlipCard').classList.remove('flipped'); // ensure front is showing
+      document.getElementById('passportModal').style.display = 'flex';
+    }
+    function closeSupervisorPassport() {
+      document.getElementById('passportModal').style.display = 'none';
+      setTimeout(() => document.getElementById('supervisorFlipCard').classList.remove('flipped'), 300);
+    }
+
+    // TBT Dropdown Logic
+    function generateWorkerDropdowns() {
+      const count = parseInt(document.getElementById('tbt_worker_count').value) || 0;
+      const container = document.getElementById('tbt-attendance-container');
+      container.innerHTML = '';
+      
+      const operators = currentUserData?.operators_assigned || ['W-1001', 'W-1002', 'W-1003'];
+      
+      for(let i = 0; i < count; i++) {
+        const optionsHtml = operators.map(op => `<option value="${op}">Worker ID: ${op}</option>`).join('');
+        container.innerHTML += `
+          <div class="form-group-sm" style="margin-bottom:0;">
+            <label class="form-label-sm">Select Worker ${i+1}</label>
+            <select class="form-select-sm" required>
+              <option value="" disabled selected>Select from assigned team</option>
+              ${optionsHtml}
+            </select>
+          </div>
+        `;
+      }
+    }
+
+    // Mock Functions for New Tabs
+    function lookupWorker() {
+      const val = document.getElementById('worker_id').value;
+      if(val.trim() === '') { showToast('Enter an ID first.', false); return; }
+      document.getElementById('worker-result').style.display = 'block';
+    }
+
+    function triggerMuster() {
+      if(confirm('Are you sure you want to trigger a ZONE WIDE EVACUATION alarm?')) {
+        showToast('EMERGENCY MUSTER INITIATED! Control room notified.', false);
+      }
+    }
+
+    // Voice to Text Feature
+    let isRecognizing = false;
+    let recognitionInstance = null;
+
+    function startSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        showToast('Speech recognition not supported in this browser.', false);
+        return;
+      }
+      
+      const micBtn = document.getElementById('mic-btn');
+
+      if (isRecognizing && recognitionInstance) {
+        recognitionInstance.stop();
+        return;
+      }
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionInstance = new SpeechRecognition();
+      
+      // Use en-IN to force transcription in the Latin alphabet (Hinglish) instead of Devanagari (Hindi script)
+      recognitionInstance.lang = 'en-IN'; 
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true; // Enable real-time transcription
+      
+      let final_transcript = document.getElementById('description').value;
+      if (final_transcript && !final_transcript.endsWith(' ')) final_transcript += ' ';
+
+      recognitionInstance.onstart = function() {
+        isRecognizing = true;
+        micBtn.classList.add('recording-active');
+        showToast('Listening... Speak now. (Click mic again to stop)', true);
+      };
+      
+      recognitionInstance.onresult = function(event) {
+        let interim_transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            final_transcript += event.results[i][0].transcript + ' ';
+          } else {
+            interim_transcript += event.results[i][0].transcript;
+          }
+        }
+        
+        const descBox = document.getElementById('description');
+        // Capitalize first letter of final transcript
+        const formattedFinal = final_transcript.charAt(0).toUpperCase() + final_transcript.slice(1);
+        descBox.value = formattedFinal + interim_transcript;
+        
+        // Auto-expand textarea
+        descBox.style.height = '';
+        descBox.style.height = descBox.scrollHeight + 'px';
+      };
+      
+      recognitionInstance.onerror = function(event) {
+        isRecognizing = false;
+        micBtn.classList.remove('recording-active');
+        console.error("Speech Recognition Error: ", event.error);
+        if (event.error === 'not-allowed') {
+          showToast('Microphone access denied. Please allow it in settings.', false);
+        } else if (event.error === 'network') {
+          showToast('Network error. Speech API requires internet access.', false);
+        } else {
+          showToast('Mic Error: ' + event.error, false);
+        }
+      };
+
+      recognitionInstance.onend = function() {
+        isRecognizing = false;
+        micBtn.classList.remove('recording-active');
+      };
+      
+      recognitionInstance.start();
+    }
+
+    // Existing Functions
     function getSelectedTypes() {
       const cbs = document.querySelectorAll('.permit-type-cb:checked');
       return Array.from(cbs).map(c => c.value);
+    }
+
+    function validateCheckboxes() {
+      const types = getSelectedTypes();
+      const btnJsa = document.querySelector('button[onclick="generateCombinedJsa()"]');
+      // The submit button is inside formInitiatePermit
+      const btnSubmit = document.querySelector('#formInitiatePermit button[type="submit"]'); 
+      
+      if (types.length === 0) {
+        if(btnJsa) { btnJsa.disabled = true; btnJsa.style.opacity = '0.5'; btnJsa.style.cursor = 'not-allowed'; }
+        if(btnSubmit) { btnSubmit.disabled = true; btnSubmit.style.opacity = '0.5'; btnSubmit.style.cursor = 'not-allowed'; }
+      } else {
+        if(btnJsa) { btnJsa.disabled = false; btnJsa.style.opacity = '1'; btnJsa.style.cursor = 'pointer'; }
+        if(btnSubmit) { btnSubmit.disabled = false; btnSubmit.style.opacity = '1'; btnSubmit.style.cursor = 'pointer'; }
+      }
     }
 
     async function generateCombinedJsa() {
@@ -227,109 +1058,292 @@
       box.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Merging hazard lists & generating AI JSA...';
 
       try {
+        const token = sessionStorage.getItem('vg_token');
         const res = await fetch('../php/api/jsa-api.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+          },
           body: JSON.stringify({ job_description: desc, permit_types: types })
         });
-        const data = await res.json();
-        box.innerHTML = `
-          <div style="font-weight:600; color:var(--vg-accent-primary); margin-bottom:6px;">✓ ${data.jsa_number} (Recommended: ${data.recommended_permit}):</div>
-          <ol style="padding-left:20px; margin-bottom:8px; color:var(--vg-text-primary);">
-            ${data.steps.map(s => `<li><strong>${s.step_description}:</strong> ${s.controls}</li>`).join('')}
-          </ol>
-          <div style="font-size:11px; color:var(--vg-status-warning);">⚡ Special Precautions: ${data.special_precautions.join(' | ')}</div>
-        `;
+        const rawText = await res.text();
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch(e) {
+            box.innerHTML = '<span style="color:var(--vg-status-danger);">JSON Parse Error. Server output: ' + escapeHtml(rawText) + '</span>';
+            return;
+        }
+          
+        if (!data.success) {
+            box.innerHTML = '<span style="color:var(--vg-status-danger);">API Error: ' + (data.message || 'Unknown') + '</span>';
+            return;
+        }
+
+        function getRiskBadge(risk) {
+              if (risk === 'Extreme') return '<span class="vg-badge vg-badge-danger">Extreme</span>';
+              if (risk === 'High') return '<span class="vg-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;">High</span>';
+              if (risk === 'Medium') return '<span class="vg-badge vg-badge-warning">Medium</span>';
+              return '<span class="vg-badge vg-badge-success">Low</span>';
+          }
+
+          const rows = data.steps.map(s => `
+            <tr>
+              <td style="font-size:13px; font-weight:500;">${s.step_description}</td>
+              <td>${getRiskBadge(s.initial_risk)}</td>
+              <td style="font-size:12px; color:var(--vg-text-muted);">${s.controls}</td>
+              <td>${getRiskBadge(s.revised_risk)}</td>
+            </tr>
+          `).join('');
+
+          box.innerHTML = `
+            <div style="font-weight:600; color:var(--vg-accent-primary); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                <span><i class='bx bx-brain'></i> AI Generated JSA (${data.jsa_number})</span>
+                <span class="vg-badge vg-badge-success"><i class='bx bx-check'></i> Scope Mapped</span>
+            </div>
+            <div style="font-size:12px; color:var(--vg-text-muted); margin-bottom:12px;">
+                <i class='bx bx-user'></i> <strong>Responsible Person:</strong> Supervisor & Safety Officer
+            </div>
+            <div class="vg-table-wrapper" style="margin-bottom:0;">
+                <table class="vg-table" style="min-width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Step Breakdown</th>
+                            <th style="width: 15%;">Initial Risk</th>
+                            <th style="width: 45%;">Control Measures</th>
+                            <th style="width: 15%;">Revised Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+          `;
       } catch (err) {
         box.innerHTML = '<span style="color:var(--vg-status-danger);">Failed to generate combined JSA.</span>';
       }
     }
 
-    async function loadPermits() {
-      try {
-        const res = await fetch('../php/api/permits-api.php');
-        const data = await res.json();
-        const container = document.getElementById('permits-list');
-
-        if (data.success && data.permits.length > 0) {
-          container.innerHTML = data.permits.map(p => `
-            <div style="background:var(--vg-bg-surface-elevated); border-left:4px solid var(--vg-accent-primary); border-radius:var(--vg-radius); padding:16px; margin-bottom:12px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="code-font" style="font-weight:700;">${p.serial_no}</span>
-                <span class="vg-badge vg-badge-info">${p.status}</span>
-              </div>
-              <div style="font-size:13px; font-weight:600; margin-bottom:4px;">${p.permit_type} - ${p.equipment}</div>
-              <div style="font-size:12px; color:var(--vg-text-muted); margin-bottom:12px;"><i class='bx bx-map'></i> ${p.location} | Initiator: ${p.company_supervisor}</div>
-              <div style="display:flex; gap:8px;">
-                <button onclick="openPermitModal('${p.serial_no}')" class="vg-btn vg-btn-secondary vg-btn-sm"><i class='bx bx-show'></i> View Form</button>
-                <a href="permit-view.html?id=${p.id}&print=1" class="vg-btn vg-btn-primary vg-btn-sm" target="_blank"><i class='bx bx-printer'></i> Print PDF</a>
-              </div>
-            </div>
-          `).join('');
-        } else {
-          container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--vg-text-muted);">No active permits found.</div>';
-        }
-      } catch (err) { console.error(err); }
-    }
-
     async function handleCreatePermit(e) {
-      e.preventDefault();
-      const types = getSelectedTypes();
-      if (types.length === 0) { alert('Please select at least one permit category.'); return; }
+        e.preventDefault();
+        const types = getSelectedTypes();
+        if (types.length === 0) { showToast('Select a category.', false); return; }
+        
+        const payload = {
+            permit_type: types.join(" + "),
+            job_type: document.getElementById('job_type').value,
+            equipment: document.getElementById('equipment').value,
+            location: document.getElementById('location').value,
+            description: document.getElementById('description').value,
+            from_dept: document.getElementById('from_dept').value,
+            to_dept: document.getElementById('to_dept').value
+        };
 
+        try {
+            const token = sessionStorage.getItem('vg_token');
+            const res = await fetch('../php/api/permits-api.php?action=create', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast('Permit ' + data.permit.serial_no + ' successfully submitted!', true);
+                e.target.reset();
+                if(initiatorSigPad) initiatorSigPad.clear();
+                document.getElementById('jsa-preview-box').style.display = 'none';
+                setTimeout(() => { switchView('view-pending', document.querySelectorAll('.vg-nav-link')[2]); }, 1000);
+            } else {
+                showToast(data.message || 'Failed to create permit', false);
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('Network error while creating permit.', false);
+        }
+      }
+  
+    async function submitIncident(e) {
+      e.preventDefault();
+      
       const payload = {
-        permit_type: types.join(' + '),
-        job_type: document.getElementById('job_type').value,
-        from_dept: document.getElementById('from_dept').value,
-        to_dept: document.getElementById('to_dept').value,
-        section: 'Unit 01', plant: 'Plant A',
-        location: document.getElementById('location').value,
-        equipment: document.getElementById('equipment').value,
-        description: document.getElementById('description').value,
-        carried_out_by: 'Maintenance Team',
-        company_supervisor: 'Deepak Kumar',
-        signature_data: initiatorSigPad ? initiatorSigPad.toDataURL() : null
+        type: document.getElementById('incident-type').value,
+        severity: document.getElementById('incident-severity').value,
+        location: document.getElementById('incident-location').value,
+        description: document.getElementById('incident-description').value
       };
 
       try {
-        const res = await fetch('../php/api/permits-api.php?action=create', {
+        const token = sessionStorage.getItem('vg_token');
+        const res = await fetch('../php/api/create-incident.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
+        
         if (data.success) {
-          alert('✓ Combined Permit ' + data.serial_no + ' created successfully!');
-          loadPermits();
+          showToast(data.message, true);
+          
+          // Add to history table
+          const tbody = document.getElementById('incident-history-tbody');
+          if (tbody.querySelector('td[colspan]')) tbody.innerHTML = '';
+          const date = new Date().toLocaleString();
+          let sevColor = payload.severity === 'High' || payload.severity === 'Critical' ? '#ef4444' : (payload.severity === 'Medium' ? 'var(--vg-status-warning)' : 'var(--vg-status-success)');
+          const newRow = `<tr>
+            <td>${date}</td>
+            <td>${payload.type}</td>
+            <td style="color: ${sevColor}; font-weight: 600;">${payload.severity}</td>
+            <td>${payload.location}</td>
+          </tr>`;
+          tbody.insertAdjacentHTML('afterbegin', newRow);
+          
+          e.target.reset();
+        } else {
+          showToast(data.message || 'Failed to report incident', false);
         }
-      } catch (err) { alert('Error creating permit.'); }
+      } catch(err) {
+        console.error(err);
+        showToast('Network error while submitting report.', false);
+      }
     }
-
-    loadPermits();
-
-    function openPermitModal(permitId) {
-      document.getElementById('modalTitle').innerText = 'Permit Details: ' + permitId;
-      document.getElementById('permitModal').style.display = 'flex';
+    
+    async function submitGasLog(e) {
+      e.preventDefault();
+      
+      const permitId = document.getElementById('gas-permit-id').value;
+      const o2 = document.getElementById('gas-o2').value;
+      const lel = document.getElementById('gas-lel').value;
+      const h2s = document.getElementById('gas-h2s').value;
+      
+      try {
+        const token = sessionStorage.getItem('vg_token');
+        const res = await fetch('../php/api/save-gas-log.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ permit_id: permitId, o2: o2, lel: lel, h2s: h2s })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          showToast('Gas readings logged securely.', true);
+          e.target.reset();
+          loadGasLogs(); // refresh the table
+        } else {
+          showToast(data.message || 'Failed to save log', false);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Network error while saving gas log.', false);
+      }
     }
-  </script>
-  <!-- Permit View Modal -->
-  <div id="permitModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:var(--vg-bg-surface); border:1px solid var(--vg-border); border-radius:var(--vg-radius-lg); width:100%; max-width:800px; max-height:90vh; display:flex; flex-direction:column; box-shadow:var(--vg-shadow);">
-      <div style="padding:20px; border-bottom:1px solid var(--vg-border); display:flex; justify-content:space-between; align-items:center;">
-        <h3 id="modalTitle" style="font-family:var(--font-outfit); font-size:20px; font-weight:700;">Permit Details</h3>
-        <button onclick="document.getElementById('permitModal').style.display='none'" style="background:transparent; border:none; color:var(--vg-text-secondary); font-size:24px; cursor:pointer;"><i class='bx bx-x'></i></button>
-      </div>
-      <div style="padding:20px; overflow-y:auto; flex:1; font-size:14px; color:var(--vg-text-secondary);">
-        <p>Previewing details for permit securely within the dashboard.</p>
-        <div style="background:var(--vg-bg-input); padding:16px; border-radius:var(--vg-radius); margin-top:16px;">
-          <h4 style="color:var(--vg-text-primary); margin-bottom:8px;">Scope of Work</h4>
-          <p>Confined space entry, chemical residue cleaning, and safety checks verified.</p>
+    
+    async function loadGasLogs() {
+      const tbody = document.getElementById('gas-log-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--vg-text-muted);"><i class='bx bx-loader-alt bx-spin'></i> Loading logs...</td></tr>`;
+      
+      try {
+        const token = sessionStorage.getItem('vg_token');
+        const res = await fetch('../php/api/get-gas-logs.php', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.data.length > 0) {
+          tbody.innerHTML = data.data.map(log => {
+            const time = new Date(log.timestamp).toLocaleTimeString();
+            let o2Color = (log.o2 < 19.5 || log.o2 > 23.5) ? 'color: #ef4444; font-weight: 600;' : 'color: var(--vg-status-success);';
+            let lelColor = (log.lel > 10) ? 'color: #ef4444; font-weight: 600;' : 'color: var(--vg-status-success);';
+            let h2sColor = (log.h2s > 10) ? 'color: #ef4444; font-weight: 600;' : 'color: var(--vg-status-success);';
+            
+            return `<tr>
+              <td>${time}</td>
+              <td class="code-font">${log.permit_id}</td>
+              <td style="${o2Color}">${log.o2}%</td>
+              <td style="${lelColor}">${log.lel}%</td>
+              <td style="${h2sColor}">${log.h2s}</td>
+            </tr>`;
+          }).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--vg-text-muted);">No logs recorded yet.</td></tr>`;
+        }
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--vg-status-danger);">Failed to load logs.</td></tr>`;
+      }
+    }
+    
+    function openMockQrScanner() {
+      // Simulate opening a camera scanner
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100%'; overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
+      overlay.style.zIndex = '9999';
+      overlay.style.display = 'flex'; overlay.style.flexDirection = 'column';
+      overlay.style.alignItems = 'center'; overlay.style.justifyContent = 'center';
+      
+      overlay.innerHTML = `
+        <h3 style="color: #fff; font-family: var(--font-outfit); margin-bottom: 20px;"><i class='bx bx-scan bx-flashing'></i> Align QR Code within frame</h3>
+        <div style="width: 250px; height: 250px; border: 2px dashed var(--vg-primary); border-radius: 20px; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--vg-primary); animation: scanline 2s infinite linear;"></div>
         </div>
-      </div>
-      <div style="padding:20px; border-top:1px solid var(--vg-border); display:flex; justify-content:flex-end; gap:12px;">
-        <button onclick="document.getElementById('permitModal').style.display='none'" class="vg-btn vg-btn-secondary">Close</button>
-      </div>
-    </div>
-  </div>
+        <button class="vg-btn vg-btn-secondary" style="margin-top: 30px;" onclick="document.body.removeChild(this.parentElement)">Cancel</button>
+      `;
+      
+      const style = document.createElement('style');
+      style.innerHTML = `@keyframes scanline { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }`;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(overlay);
+      
+      // Simulate a successful scan after 2.5 seconds
+      setTimeout(() => {
+        if (document.body.contains(overlay)) {
+          document.body.removeChild(overlay);
+          showToast('QR Code Verified! Worker ID: W-1002 (Ramesh Kumar)', true);
+          document.getElementById('worker_id').value = 'W-1002';
+          lookupWorker();
+        }
+      }, 2500);
+    }
+    // Tab Closure Beacon
+    // Smart Heartbeat: Announce online status
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        fetch('../php/api/ping.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(e=>console.log(e));
+        setInterval(() => {
+          fetch('../php/api/ping.php', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(e=>console.log(e));
+        }, 30000);
+      }
+    });
+
+    // Smart Heartbeat: Announce offline status on tab close/refresh without destroying session
+    window.addEventListener('pagehide', () => {
+      const authChannel = new BroadcastChannel('vg_auth_sync');
+      authChannel.postMessage('sync_users');
+      const token = sessionStorage.getItem('vg_token');
+      if (token) {
+        navigator.sendBeacon('../php/api/offline.php', new URLSearchParams({ token: token }));
+      }
+    });
+    // (Removed inline loadOrgTree, generateTreeHTML, renderNode, and toggleTreeNode as they are now in org-tree.js)
+  </script>
+
+  <!-- External Scripts -->
+  <script src="../assets/js/org-tree.js"></script>
 </body>
-</html>
+

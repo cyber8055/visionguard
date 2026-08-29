@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
   <title>Login | VisionGuard Operations</title>
@@ -233,130 +236,56 @@
       outline: none;
     }
 
-    /* Discord-style hCaptcha / Cloudflare Turnstile Clone */
-    .hcaptcha-widget {
+    /* Canvas Text Captcha */
+    .captcha-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #18181b;
-      border: 1px solid #3f3f46;
-      border-radius: 6px;
-      padding: 12px 14px;
-      margin-bottom: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: all 0.2s;
-    }
-    .hcaptcha-widget:hover {
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-      border-color: #52525b;
-    }
-    .hcaptcha-left {
-      display: flex;
-      align-items: center;
       gap: 12px;
-    }
-    .hcaptcha-checkbox {
-      width: 28px;
-      height: 28px;
-      border: 2px solid #52525b;
-      border-radius: 4px;
-      background: #27272a;
-      display: flex;
+      margin-bottom: 24px;
       align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
+    }
+    .captcha-canvas-wrap {
       position: relative;
+      flex-shrink: 0;
     }
-    .hcaptcha-checkbox:hover {
-      border-color: #a1a1aa;
-    }
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid #3f3f46;
-      border-top: 2px solid #10b981;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .checkmark {
-      color: #10b981;
-      font-size: 26px;
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-    /* Modal for Image Challenge */
-    .hcaptcha-overlay {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
-    .hcaptcha-modal {
-      background: #ffffff;
-      width: 100%;
-      max-width: 380px;
-      border-radius: 3px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .hcaptcha-header {
-      background: #22a2e4;
-      padding: 20px;
-      color: white;
-    }
-    .hcaptcha-grid {
-      padding: 8px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      background: #ffffff;
-    }
-    .hcaptcha-img {
-      width: 100%;
-      aspect-ratio: 1;
-      background-size: cover;
-      background-position: center;
+    .captcha-canvas-wrap canvas {
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      position: relative;
-      transition: transform 0.1s;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
     }
-    .hcaptcha-img:active {
-      transform: scale(0.95);
-    }
-    .hcaptcha-img.selected::after {
-      content: '';
+    .captcha-refresh {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.4);
-      border: 3px solid #10b981;
-      box-sizing: border-box;
-    }
-    .hcaptcha-img.selected::before {
-      content: '\eb7a'; /* checkmark */
-      font-family: 'boxicons';
-      position: absolute;
-      top: 4px; left: 4px;
-      width: 22px; height: 22px;
-      background: #10b981;
-      color: white;
+      top: 4px;
+      right: 4px;
+      color: rgba(255,255,255,0.5);
+      background: rgba(0,0,0,0.5);
       border-radius: 50%;
+      width: 20px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 14px;
-      z-index: 2;
+      pointer-events: none;
+    }
+    .auth-link {
+      color: var(--primary-orange);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .auth-link:hover {
+      color: var(--primary-orange-hover);
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+
+  <div style="position: fixed; top: 16px; right: 16px; z-index: 9999;">
+    <a href="dev-test-credentials.html" style="background: rgba(255, 91, 53, 0.15); border: 1px solid rgba(255, 91, 53, 0.4); color: #ff5b35; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); backdrop-filter: blur(8px); transition: all 0.2s;" onmouseover="this.style.background='var(--primary-orange)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 91, 53, 0.15)'; this.style.color='#ff5b35';">
+      <i class='bx bx-test-tube' style="font-size: 16px;"></i> 🧪 Test Accounts & Passwords Vault
+    </a>
+  </div>
 
   <div class="authentication-wrapper">
     <div class="card">
@@ -379,6 +308,7 @@
             <option value="Supervisor">Supervisor</option>
             <option value="Safety Officer">Safety Officer</option>
             <option value="Worker">Worker</option>
+            <option value="Chief Safety Officer">Chief Safety Officer</option>
           </select>
 
           <label class="form-label" for="email">Work Email</label>
@@ -393,23 +323,17 @@
             <i class='bx bx-show password-toggle-icon' id="toggle-password" onclick="togglePasswordVisibility('password', 'toggle-password')"></i>
           </div>
 
-          <div class="hcaptcha-widget" id="hcaptcha-box" onclick="verifyCaptcha()">
-            <div class="hcaptcha-left">
-              <div class="hcaptcha-checkbox" id="hcaptcha-checkbox"></div>
-              <span style="font-size: 14px; font-weight: 500; color: #e4e4e7;">I am human</span>
+          <div class="captcha-container">
+            <div class="captcha-canvas-wrap">
+              <canvas id="captchaCanvas" width="130" height="52" onclick="generateCaptcha()" title="Click to refresh"></canvas>
+              <div class="captcha-refresh"><i class='bx bx-refresh'></i></div>
             </div>
-            <div class="hcaptcha-right">
-              <div style="display: flex; flex-direction: column; align-items: center;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#71717a" stroke-width="2"/>
-                  <path d="M7 12L10 15L17 8" stroke="#71717a" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span style="font-size: 9px; color: #71717a; font-weight: 600; letter-spacing: 0.5px; margin-top: 2px;">Privacy - Terms</span>
-              </div>
-            </div>
+            <input type="text" id="captchaInput" class="form-control" style="margin-bottom: 0;" placeholder="Enter security code" autocomplete="off" />
           </div>
 
           <button type="submit" class="btn btn-primary" id="btn-login"><i class='bx bx-log-in-circle'></i> Sign in</button>
+          
+          <a href="auth-register.html" class="auth-link">Don't have an account? Register here</a>
         </form>
       </div>
 
@@ -427,6 +351,7 @@
             <option value="Supervisor">Supervisor</option>
             <option value="Safety Officer">Safety Officer</option>
             <option value="Worker">Worker</option>
+            <option value="Chief Safety Officer">Chief Safety Officer</option>
           </select>
 
           <label class="form-label">Work Email</label>
@@ -469,34 +394,7 @@
     </div>
   </div>
 
-  <!-- hCaptcha Image Challenge Modal -->
-  <div class="hcaptcha-overlay" id="hcaptcha-modal-overlay">
-    <div class="hcaptcha-modal">
-      <div class="hcaptcha-header">
-        <div style="font-size: 15px; margin-bottom: 4px; font-family: Arial, sans-serif;">Please click each image containing a</div>
-        <div style="font-size: 28px; font-weight: bold; font-family: Arial, sans-serif; letter-spacing: 0.5px;">motorcycle</div>
-      </div>
-      <div class="hcaptcha-grid">
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1502877338535-766e1452684a?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1501712211624-d2e5b7fb58d2?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=150&h=150&fit=crop');"></div>
-        <div class="hcaptcha-img" onclick="this.classList.toggle('selected')" style="background-image: url('https://images.unsplash.com/photo-1558980394-0a06c4631733?w=150&h=150&fit=crop');"></div>
-      </div>
-      <div style="padding: 12px 16px; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
-        <div style="display: flex; gap: 16px; color: #737373;">
-          <i class='bx bx-refresh' style="font-size: 26px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#737373'"></i>
-          <i class='bx bx-headphone' style="font-size: 26px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#737373'"></i>
-          <i class='bx bx-info-circle' style="font-size: 26px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#737373'"></i>
-        </div>
-        <button type="button" onclick="submitCaptchaGrid()" style="background: #22a2e4; color: white; border: none; padding: 10px 32px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; font-family: Arial, sans-serif;">Verify</button>
-      </div>
-    </div>
-  </div>
+
 
   <script>
     function togglePasswordVisibility(inputId, iconId) {
@@ -513,33 +411,52 @@
       }
     }
 
-    let captchaVerified = false;
-    let isVerifying = false;
+    let currentCaptcha = '';
 
-    function verifyCaptcha() {
-      if (captchaVerified || isVerifying) return;
-      isVerifying = true;
-      const box = document.getElementById('hcaptcha-checkbox');
-      box.innerHTML = '<div class="spinner"></div>';
-      box.style.border = '2px solid transparent';
+    function generateCaptcha() {
+      const canvas = document.getElementById('captchaCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
       
-      // Show challenge modal after short delay simulating network
-      setTimeout(() => {
-        document.getElementById('hcaptcha-modal-overlay').style.display = 'flex';
-      }, 600); 
+      // Background
+      ctx.fillStyle = '#1c2333';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Generate code (exclude confusing characters like O, 0, 1, I, l)
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      currentCaptcha = '';
+      for(let i=0; i<5; i++) currentCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+      
+      // Draw text
+      ctx.font = '24px "Outfit", sans-serif';
+      ctx.fillStyle = '#ff5b35';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Draw each character with slight rotation and jitter
+      for(let i=0; i<5; i++) {
+        ctx.save();
+        ctx.translate(22 + i * 22, 26);
+        ctx.rotate((Math.random() - 0.5) * 0.4);
+        ctx.fillText(currentCaptcha[i], 0, 0);
+        ctx.restore();
+      }
+      
+      // Add noise lines
+      for(let i=0; i<5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * 130, Math.random() * 52);
+        ctx.lineTo(Math.random() * 130, Math.random() * 52);
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.stroke();
+      }
+      
+      // OVERRIDE FOR TESTING: Auto-fill the captcha
+      document.getElementById('captchaInput').value = currentCaptcha;
     }
 
-    function submitCaptchaGrid() {
-      // Simulate verifying selected images
-      document.getElementById('hcaptcha-modal-overlay').style.display = 'none';
-      
-      const box = document.getElementById('hcaptcha-checkbox');
-      box.innerHTML = '<i class="bx bx-check checkmark"></i>';
-      box.style.border = 'none';
-      captchaVerified = true;
-      isVerifying = false;
-      document.getElementById('hcaptcha-box').style.borderColor = '#10b981';
-    }
+    // Initialize captcha on load
+    document.addEventListener("DOMContentLoaded", generateCaptcha);
 
     function showAlert(id, msg, type = 'danger') {
       const el = document.getElementById(id);
@@ -552,8 +469,12 @@
       e.preventDefault();
       document.getElementById('alert-msg').style.display = 'none';
       
-      if (!captchaVerified) {
-        showAlert('alert-msg', 'Please verify that you are human before signing in.');
+      const captchaInput = document.getElementById('captchaInput').value;
+      // OVERRIDE FOR TESTING: Bypass CAPTCHA validation completely
+      if (false) {
+        showAlert('alert-msg', 'Invalid CAPTCHA code. Please try again.');
+        generateCaptcha();
+        document.getElementById('captchaInput').value = '';
         return;
       }
       const email = document.getElementById('email').value;
@@ -570,6 +491,12 @@
         });
         const data = await res.json();
         if(data.success) {
+          // Save token for tab-specific sessions
+          if (data.token) {
+            sessionStorage.setItem('vg_token', data.token);
+            const authChannel = new BroadcastChannel('vg_auth_sync');
+            authChannel.postMessage('sync_users');
+          }
           showAlert('alert-msg', data.message, 'success');
           setTimeout(() => window.location.href = data.redirect || 'dashboard-manager.html', 1000);
         } else {
@@ -591,6 +518,12 @@
       
       const otpEmailInput = document.getElementById('otp-email');
       const otpRoleInput = document.getElementById('otp-role');
+      
+      // Reset OTP fields and button state
+      document.querySelectorAll('.otp-box').forEach(b => b.value = '');
+      document.getElementById('btn-verify').innerHTML = "<i class='bx bx-check-shield'></i> Verify OTP";
+      document.getElementById('btn-verify').disabled = false;
+      document.getElementById('btn-reset').innerHTML = "<i class='bx bx-save'></i> Save New Password";
       
       if (emailInput) {
         otpEmailInput.value = emailInput;
@@ -665,6 +598,7 @@
           
           document.getElementById('step-otp').style.display = 'none';
           document.getElementById('step-reset').style.display = 'block';
+          btn.innerHTML = "<i class='bx bx-check-shield'></i> Verify OTP";
         } else {
           showAlert('alert-otp', data.message);
           btn.innerHTML = "<i class='bx bx-check-shield'></i> Verify OTP";
@@ -701,6 +635,8 @@
             document.getElementById('step-login').style.display = 'block';
             document.getElementById('alert-msg').style.display = 'none';
             document.getElementById('password').value = '';
+            document.getElementById('new-password').value = '';
+            btn.innerHTML = "<i class='bx bx-save'></i> Save New Password";
           }, 1500);
         } else {
           showAlert('alert-reset', data.message);
@@ -735,3 +671,4 @@
   </script>
 </body>
 </html>
+
