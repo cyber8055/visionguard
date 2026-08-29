@@ -10,140 +10,718 @@
   
   <link rel="stylesheet" href="../assets/css/visionguard.css" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    .safety-view { display: none; }
+    #overview-view { display: block; }
+    .vg-metric-title { color: var(--vg-text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .vg-metric-value { font-family: var(--font-outfit); font-size: 32px; font-weight: 800; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Flip Card CSS */
+    .flip-card {
+      background-color: transparent;
+      width: 450px;
+      height: 500px;
+      perspective: 1000px;
+      margin: auto;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background: var(--vg-bg-surface);
+      border: 1px solid var(--vg-border);
+      border-radius: var(--vg-radius);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      text-align: left;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      background: linear-gradient(135deg, var(--vg-bg-surface), #0a1128);
+    }
+    .qr-container {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+    }
+  </style>
 </head>
 <body>
 
   <div class="vg-app-shell">
-    <div class="vg-app-body">
     
-    <aside class="vg-sidebar">
-      <div class="vg-sidebar-brand">
-        <img src="../assets/img/new-logo.png" alt="Logo" style="height: 32px;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fire_icon.svg/1024px-Fire_icon.svg.png'">
-        <span>VisionGuard</span>
-      </div>
-
-      <nav class="vg-sidebar-nav">
-        <a href="dashboard-safety.html" class="vg-nav-link active">
-          <i class='bx bx-shield-quarter'></i> Safety Checks
-        </a>
-      </nav>
-
-      <div class="vg-sidebar-user">
-        <div class="vg-user-info">
-          <h5>Safety Inspector</h5>
-          <p>Compliance Officer</p>
-        </div>
-        <a href="#" onclick="handleLogout()" style="color: var(--vg-status-danger); font-size: 18px;" title="Sign Out">
-          <i class='bx bx-log-out'></i>
+    <!-- Global Header -->
+    <header class="vg-header">
+      <div class="vg-header-left">
+        <button onclick="toggleSidebar()" class="vg-btn vg-btn-secondary vg-btn-sm" style="margin-left: -8px; border-radius: 50%; width: 38px; height: 38px; padding: 0; background: transparent; border: none; font-size: 24px; color: var(--vg-text-primary);" title="Toggle Menu">
+          <i class='bx bx-menu'></i>
+        </button>
+        <a href="dashboard-safety.html" class="vg-header-brand">
+          <i class='bx bx-check-shield' style="color: var(--vg-status-success);"></i>
+          <span>VisionGuard</span>
         </a>
       </div>
-    </aside>
-
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      
-      <header class="vg-header">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button onclick="window.history.back()" class="vg-btn vg-btn-secondary vg-btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0;" title="Go Back">
+          <i class='bx bx-arrow-back'></i>
+        </button>
         <div class="vg-header-title">
-          <h2>Safety Verification & Gas Testing Center</h2>
+          <h2 id="main-header-title">Safety Control Center</h2>
         </div>
-      </header>
+      </div>
+    </header>
 
+    <div class="vg-app-body">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="vg-sidebar">
+        <nav class="vg-sidebar-nav custom-scrollbar" style="margin-top: 12px;">
+          <div class="vg-nav-header" style="padding: 0 16px; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--vg-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">CORE SAFETY</div>
+          <a href="javascript:void(0)" onclick="switchSafetyView('overview-view', this)" class="vg-nav-link active" title="Dashboard Overview">
+            <i class='bx bx-grid-alt'></i> <span class="vg-nav-link-text">Overview</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchSafetyView('ptw-view', this)" class="vg-nav-link" title="Permit to Work">
+            <i class='bx bx-edit-alt'></i> <span class="vg-nav-link-text">Permits (PTW)</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchSafetyView('jsa-view', this)" class="vg-nav-link" title="Job Safety Analysis">
+            <i class='bx bx-list-check'></i> <span class="vg-nav-link-text">JSA Approvals</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchSafetyView('incident-view', this)" class="vg-nav-link" title="Incident Investigations">
+            <i class='bx bx-message-alt-error'></i> <span class="vg-nav-link-text">Incidents & RCA</span>
+          </a>
+
+          <div class="vg-nav-header" style="padding: 0 16px; margin-top: 24px; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--vg-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">FIELD OPERATIONS</div>
+          <a href="javascript:void(0)" onclick="switchSafetyView('audit-view', this)" class="vg-nav-link" title="Site Inspections">
+            <i class='bx bx-check-shield'></i> <span class="vg-nav-link-text">Site Audits</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchSafetyView('gas-view', this)" class="vg-nav-link" title="Gas Testing">
+            <i class='bx bx-wind'></i> <span class="vg-nav-link-text">Gas Logs</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchSafetyView('training-view', this)" class="vg-nav-link" title="Toolbox & Training">
+            <i class='bx bx-group'></i> <span class="vg-nav-link-text">Safety Training</span>
+          </a>
+
+          <div class="vg-nav-header" style="padding: 0 16px; margin-top: 24px; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--vg-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">RESPONSE</div>
+          <a href="javascript:void(0)" onclick="switchSafetyView('emergency-view', this)" class="vg-nav-link" title="Emergency Planning">
+            <i class='bx bx-first-aid'></i> <span class="vg-nav-link-text">Emergency Drills</span>
+          </a>
+        </nav>
+
+        <div class="vg-sidebar-user" style="padding: 16px; border-top: 1px solid var(--vg-border); display: flex; align-items: center; justify-content: space-between; margin-top: auto;">
+          <div class="vg-user-info" onclick="openSafetyPassport()" style="cursor: pointer; width: 100%; display: flex; align-items: center; gap: 12px;" title="View Safety Passport">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; border: 1px solid var(--vg-status-success);">
+              <span style="color: var(--vg-status-success); font-weight: 700;">SO</span>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px; color: var(--vg-text-primary);">Safety Officer</div>
+              <div style="font-size: 12px; color: var(--vg-text-secondary);">HSE Dept</div>
+            </div>
+          </div>
+          <a href="#" onclick="handleLogout()" title="Sign Out" onmouseover="this.style.transform='scale(1.1)'; this.style.color='#ff3b3b';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--vg-status-danger)';">
+            <i class='bx bx-power-off' style="color: var(--vg-status-danger); font-size: 20px; transition: all 0.2s;"></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT AREA -->
       <main class="vg-content-area">
         
-        <div class="vg-grid-4">
-          <div class="vg-card">
-            <div class="vg-metric-title">Gas Tests Today</div>
-            <div class="vg-metric-value" style="color: var(--vg-accent-primary);">12</div>
+        <!-- 1. OVERVIEW VIEW -->
+        <div id="overview-view" class="safety-view">
+          <div class="vg-grid-4" style="margin-bottom: 24px;">
+            <div class="vg-card">
+              <div class="vg-metric-title">Open Permits</div>
+              <div class="vg-metric-value" style="color: var(--vg-accent-primary);">14</div>
+            </div>
+            <div class="vg-card">
+              <div class="vg-metric-title">Pending JSAs</div>
+              <div class="vg-metric-value" style="color: var(--vg-status-warning);">3</div>
+            </div>
+            <div class="vg-card">
+              <div class="vg-metric-title">Incidents (Last 30d)</div>
+              <div class="vg-metric-value" style="color: var(--vg-status-danger);">1</div>
+            </div>
+            <div class="vg-card">
+              <div class="vg-metric-title">Compliance Rate</div>
+              <div class="vg-metric-value" style="color: var(--vg-status-success);">98.5%</div>
+            </div>
           </div>
-          <div class="vg-card">
-            <div class="vg-metric-title">Gas Levels Normal</div>
-            <div class="vg-metric-value" style="color: var(--vg-status-success);">12 / 12</div>
-          </div>
-          <div class="vg-card">
-            <div class="vg-metric-title">Pending Clearances</div>
-            <div class="vg-metric-value" style="color: var(--vg-status-warning);">2</div>
-          </div>
-          <div class="vg-card">
-            <div class="vg-metric-title">Hazard Compliance</div>
-            <div class="vg-metric-value" style="color: var(--vg-status-success);">100%</div>
+
+          <div class="vg-grid-2">
+            <div class="vg-card" style="padding: 0; overflow: hidden;">
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--vg-border); background: var(--vg-bg-surface);">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 700;"><i class='bx bx-list-check' style="color: var(--vg-accent-primary);"></i> Action Items</h3>
+              </div>
+              <div style="padding: 0;">
+                <ul style="list-style: none; margin: 0; padding: 0;">
+                  <li style="padding: 16px 20px; border-bottom: 1px solid var(--vg-border); display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <i class='bx bx-error-circle' style="color: var(--vg-status-danger); font-size: 20px;"></i>
+                      <div>
+                        <div style="font-weight: 600; font-size: 14px; color: var(--vg-text-primary);">Review Near Miss Report #NM-102</div>
+                        <div style="font-size: 12px; color: var(--vg-text-secondary);">Zone 4 Scaffold Collapse</div>
+                      </div>
+                    </div>
+                    <button class="vg-btn vg-btn-secondary vg-btn-sm">Review</button>
+                  </li>
+                  <li style="padding: 16px 20px; border-bottom: 1px solid var(--vg-border); display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <i class='bx bx-time' style="color: var(--vg-status-warning); font-size: 20px;"></i>
+                      <div>
+                        <div style="font-weight: 600; font-size: 14px; color: var(--vg-text-primary);">Pending JSA Approval (Confined Space)</div>
+                        <div style="font-size: 12px; color: var(--vg-text-secondary);">Submitted by Supervisor A</div>
+                      </div>
+                    </div>
+                    <button class="vg-btn vg-btn-secondary vg-btn-sm">View JSA</button>
+                  </li>
+                  <li style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <i class='bx bx-clipboard' style="color: var(--vg-accent-primary); font-size: 20px;"></i>
+                      <div>
+                        <div style="font-weight: 600; font-size: 14px; color: var(--vg-text-primary);">Weekly Fire Extinguisher Audit</div>
+                        <div style="font-size: 12px; color: var(--vg-text-secondary);">Due today by 17:00</div>
+                      </div>
+                    </div>
+                    <button class="vg-btn vg-btn-secondary vg-btn-sm">Start Audit</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="vg-card" style="padding: 0; overflow: hidden;">
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--vg-border); background: var(--vg-bg-surface);">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 700;"><i class='bx bx-pulse' style="color: var(--vg-status-success);"></i> Recent Activity Log</h3>
+              </div>
+              <div style="padding: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div style="display: flex; gap: 12px;">
+                    <div style="color: var(--vg-status-success); margin-top: 2px;"><i class='bx bxs-circle' style="font-size: 10px;"></i></div>
+                    <div>
+                      <div style="font-size: 14px; color: var(--vg-text-primary);">Hot Work Permit #PTW-8812 Closed</div>
+                      <div style="font-size: 12px; color: var(--vg-text-secondary);">15 mins ago</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 12px;">
+                    <div style="color: var(--vg-accent-primary); margin-top: 2px;"><i class='bx bxs-circle' style="font-size: 10px;"></i></div>
+                    <div>
+                      <div style="font-size: 14px; color: var(--vg-text-primary);">Gas Test Logged for Zone 12 (Normal)</div>
+                      <div style="font-size: 12px; color: var(--vg-text-secondary);">1 hour ago</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 12px;">
+                    <div style="color: var(--vg-status-warning); margin-top: 2px;"><i class='bx bxs-circle' style="font-size: 10px;"></i></div>
+                    <div>
+                      <div style="font-size: 14px; color: var(--vg-text-primary);">Toolbox Talk Attendance Submitted</div>
+                      <div style="font-size: 12px; color: var(--vg-text-secondary);">3 hours ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="vg-card" style="padding: 0; overflow: hidden;">
-          <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700;">
-              <i class='bx bx-shield-check' style="color: var(--vg-status-success);"></i> Safety Clearances & Atmospheric Gas Logs
-            </h3>
-            <span class="vg-badge vg-badge-success">OISD-105 Standards Active</span>
-          </div>
+        <!-- 2. PERMIT TO WORK VIEW -->
+        <div id="ptw-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-edit-alt' style="color: var(--vg-status-success);"></i> Active Permits & Gas Test Verification
+              </h3>
+              <div style="display: flex; gap: 12px;">
+                <input type="text" placeholder="Search Permits..." class="vg-form-control" style="width: 200px;">
+                <button class="vg-btn vg-btn-secondary"><i class='bx bx-filter'></i> Filter</button>
+              </div>
+            </div>
 
-          <div class="vg-table-wrapper">
-            <table class="vg-table">
-              <thead>
-                <tr>
-                  <th>Permit ID</th>
-                  <th>Location</th>
-                  <th>Atmospheric Test (O2 / LEL / H2S)</th>
-                  <th>Checklist Verification</th>
-                  <th>Safety Sign-off</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="code-font">PTW-20260822-5501</td>
-                  <td>Zone 12 - Reactor Tank V-101</td>
-                  <td><span class="vg-badge vg-badge-success">O2: 20.9% | LEL: 0% | H2S: 0ppm</span></td>
-                  <td><span class="vg-badge vg-badge-success">✓ 14/14 Items Passed</span></td>
-                  <td><span class="vg-badge vg-badge-accent">Verified by Officer R. Sharma</span></td>
-                  <td>
-                    <button onclick="openPermitModal('PTW-20260822-5501')" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-check-double'></i> Inspect & Sign</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="code-font">PTW-20260822-0250</td>
-                  <td>Zone 04 - Cable Trench Line</td>
-                  <td><span class="vg-badge vg-badge-info">N/A (Excavation)</span></td>
-                  <td><span class="vg-badge vg-badge-success">✓ Underground Line Clear</span></td>
-                  <td><span class="vg-badge vg-badge-accent">Verified by Officer R. Sharma</span></td>
-                  <td>
-                    <button onclick="openPermitModal('PTW-20260822-0250')" class="vg-btn vg-btn-primary vg-btn-sm"><i class='bx bx-check-double'></i> Inspect & Sign</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Permit ID</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Gas Verification</th>
+                    <th>Checklist Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="code-font">PTW-20260822-5501</td>
+                    <td>Confined Space</td>
+                    <td>Zone 12 - Reactor Tank</td>
+                    <td><span class="vg-badge vg-badge-warning">Pending Officer Check</span></td>
+                    <td><span class="vg-badge vg-badge-success">14/14 Passed</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-primary vg-btn-sm" onclick="alert('Feature coming soon')"><i class='bx bx-check-double'></i> Verify</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">PTW-20260822-8812</td>
+                    <td>Hot Work</td>
+                    <td>Zone 02 - Flare Stack B</td>
+                    <td><span class="vg-badge vg-badge-success">O2: 20.9% | LEL: 0%</span></td>
+                    <td><span class="vg-badge vg-badge-success">8/8 Passed</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="alert('Feature coming soon')"><i class='bx bx-show'></i> View</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">PTW-20260822-0250</td>
+                    <td>Excavation</td>
+                    <td>Zone 04 - Trench Line</td>
+                    <td><span class="vg-badge vg-badge-info">N/A</span></td>
+                    <td><span class="vg-badge vg-badge-warning">Awaiting Scan</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-primary vg-btn-sm" onclick="alert('Feature coming soon')"><i class='bx bx-check-double'></i> Verify</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. JSA VIEW -->
+        <div id="jsa-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-list-check' style="color: var(--vg-accent-primary);"></i> Job Safety Analysis (JSA) Approvals
+              </h3>
+              <button class="vg-btn vg-btn-primary"><i class='bx bx-plus'></i> New JSA Template</button>
+            </div>
+            
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>JSA ID</th>
+                    <th>Activity Description</th>
+                    <th>Submitted By</th>
+                    <th>Risk Score</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="code-font">JSA-8492</td>
+                    <td>Welding on high pressure steam line</td>
+                    <td>Rahul Singh (Sup)</td>
+                    <td><span class="vg-badge vg-badge-danger">High (16)</span></td>
+                    <td><span class="vg-badge vg-badge-warning">Pending Review</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-primary vg-btn-sm" onclick="alert('Feature coming soon')">Review JSA</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">JSA-8491</td>
+                    <td>Routine HVAC Filter Replacement</td>
+                    <td>Abhishek Sharma (Sup)</td>
+                    <td><span class="vg-badge vg-badge-success">Low (4)</span></td>
+                    <td><span class="vg-badge vg-badge-success">Approved</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="alert('Feature coming soon')">View</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. INCIDENTS VIEW -->
+        <div id="incident-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-message-alt-error' style="color: var(--vg-status-danger);"></i> Incident & RCA Tracking
+              </h3>
+              <button class="vg-btn vg-btn-primary"><i class='bx bx-plus'></i> Log Incident</button>
+            </div>
+            
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Ref ID</th>
+                    <th>Date</th>
+                    <th>Classification</th>
+                    <th>Location</th>
+                    <th>RCA Status</th>
+                    <th>CAPA Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="code-font">INC-2026-004</td>
+                    <td>2026-08-28</td>
+                    <td><span class="vg-badge vg-badge-warning">Near Miss</span></td>
+                    <td>Zone 4 - Storage</td>
+                    <td><span class="vg-badge vg-badge-info">In Progress</span></td>
+                    <td><span class="vg-badge vg-badge-warning">Pending</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="alert('Feature coming soon')">Manage RCA</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="code-font">INC-2026-003</td>
+                    <td>2026-08-15</td>
+                    <td><span class="vg-badge vg-badge-danger">LTI (Lost Time)</span></td>
+                    <td>Zone 1 - Main Floor</td>
+                    <td><span class="vg-badge vg-badge-success">Completed</span></td>
+                    <td><span class="vg-badge vg-badge-success">Closed</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="alert('Feature coming soon')">View Report</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. AUDIT VIEW -->
+        <div id="audit-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-check-shield' style="color: var(--vg-accent-primary);"></i> Site Inspections & Audits
+              </h3>
+              <button class="vg-btn vg-btn-primary"><i class='bx bx-plus'></i> Start Audit</button>
+            </div>
+            
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Audit Title</th>
+                    <th>Category</th>
+                    <th>Date Planned</th>
+                    <th>Completion</th>
+                    <th>Findings</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Weekly Fire Extinguisher Check</td>
+                    <td>Fire Safety</td>
+                    <td>Today, 17:00</td>
+                    <td><div style="width:100%; background:rgba(255,255,255,0.1); height:8px; border-radius:4px;"><div style="width:0%; background:var(--vg-accent-primary); height:100%; border-radius:4px;"></div></div></td>
+                    <td>-</td>
+                    <td>
+                      <button class="vg-btn vg-btn-primary vg-btn-sm" onclick="alert('Feature coming soon')">Execute</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>PPE Compliance Walkthrough</td>
+                    <td>General Safety</td>
+                    <td>2026-08-25</td>
+                    <td><div style="width:100%; background:rgba(255,255,255,0.1); height:8px; border-radius:4px;"><div style="width:100%; background:var(--vg-status-success); height:100%; border-radius:4px;"></div></div></td>
+                    <td><span class="vg-badge vg-badge-warning">2 Non-Compliance</span></td>
+                    <td>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="alert('Feature coming soon')">View Report</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. GAS LOGS VIEW -->
+        <div id="gas-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-wind' style="color: var(--vg-accent-primary);"></i> Atmospheric & Gas Testing Logs
+              </h3>
+              <button class="vg-btn vg-btn-primary"><i class='bx bx-plus'></i> Log Manual Test</button>
+            </div>
+            
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Location/Zone</th>
+                    <th>O2 (19.5-23.5%)</th>
+                    <th>LEL (<10%)</th>
+                    <th>H2S (<10ppm)</th>
+                    <th>CO (<35ppm)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026-08-29 10:15:00</td>
+                    <td>Zone 12 (Tank V-101)</td>
+                    <td>20.9%</td>
+                    <td>0%</td>
+                    <td>0 ppm</td>
+                    <td>0 ppm</td>
+                    <td><span class="vg-badge vg-badge-success">Safe</span></td>
+                  </tr>
+                  <tr>
+                    <td>2026-08-29 09:30:00</td>
+                    <td>Zone 02 (Flare B)</td>
+                    <td>20.5%</td>
+                    <td>5%</td>
+                    <td>2 ppm</td>
+                    <td>10 ppm</td>
+                    <td><span class="vg-badge vg-badge-warning">Warning (Elevated)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. TRAINING VIEW -->
+        <div id="training-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0;">
+                <i class='bx bx-group' style="color: var(--vg-accent-primary);"></i> Toolbox Talks & Certifications
+              </h3>
+              <div style="display: flex; gap: 12px;">
+                <button class="vg-btn vg-btn-secondary" onclick="alert('Feature coming soon')">View Certifications</button>
+                <button class="vg-btn vg-btn-primary"><i class='bx bx-plus'></i> Schedule TBT</button>
+              </div>
+            </div>
+            
+            <div class="vg-table-wrapper">
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Topic</th>
+                    <th>Target Audience</th>
+                    <th>Trainer</th>
+                    <th>Attendance</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026-08-30</td>
+                    <td>Confined Space Rescue Procedures</td>
+                    <td>Maintenance Team</td>
+                    <td>Safety Officer</td>
+                    <td>-</td>
+                    <td>
+                      <button class="vg-btn vg-btn-primary vg-btn-sm" onclick="alert('Feature coming soon')">Log Attendance</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>2026-08-28</td>
+                    <td>Heat Stress Management</td>
+                    <td>All Field Workers</td>
+                    <td>Safety Officer</td>
+                    <td>45/50 (90%)</td>
+                    <td>
+                      <button class="vg-btn vg-btn-secondary vg-btn-sm" onclick="alert('Feature coming soon')">View Roster</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. EMERGENCY VIEW -->
+        <div id="emergency-view" class="safety-view">
+          <div class="vg-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--vg-border); background: rgba(239, 68, 68, 0.05); display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-family: var(--font-outfit); font-size: 18px; font-weight: 700; margin: 0; color: var(--vg-status-danger);">
+                <i class='bx bx-first-aid' style="color: var(--vg-status-danger);"></i> Emergency Drills & Response Planning
+              </h3>
+              <button class="vg-btn vg-btn-primary" style="background: var(--vg-status-danger); color: #fff; border: none;"><i class='bx bx-plus'></i> Log Mock Drill</button>
+            </div>
+            
+            <div style="padding: 24px;">
+              <div class="vg-grid-3">
+                <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                  <div style="font-size: 13px; color: var(--vg-text-secondary); margin-bottom: 8px;">Last Fire Drill</div>
+                  <div style="font-size: 18px; font-weight: 700; color: var(--vg-text-primary);">2026-07-15</div>
+                  <div style="font-size: 12px; color: var(--vg-status-success); margin-top: 4px;">Evacuation Time: 4m 12s</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                  <div style="font-size: 13px; color: var(--vg-text-secondary); margin-bottom: 8px;">Last Chemical Spill Drill</div>
+                  <div style="font-size: 18px; font-weight: 700; color: var(--vg-text-primary);">2026-05-10</div>
+                  <div style="font-size: 12px; color: var(--vg-status-warning); margin-top: 4px;">Overdue for refresh</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--vg-border);">
+                  <div style="font-size: 13px; color: var(--vg-text-secondary); margin-bottom: 8px;">Medical Emergency Drill</div>
+                  <div style="font-size: 18px; font-weight: 700; color: var(--vg-text-primary);">2026-08-01</div>
+                  <div style="font-size: 12px; color: var(--vg-status-success); margin-top: 4px;">Satisfactory Performance</div>
+                </div>
+              </div>
+
+              <h4 style="margin-top: 24px; font-size: 14px; color: var(--vg-text-primary); margin-bottom: 16px;">Emergency Contact Matrix</h4>
+              <table class="vg-table">
+                <thead>
+                  <tr>
+                    <th>Role / Dept</th>
+                    <th>Name</th>
+                    <th>Primary Contact</th>
+                    <th>Radio Channel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Chief Safety Officer</td>
+                    <td>Arun Patel</td>
+                    <td>+91 98765 43210</td>
+                    <td>CH-01</td>
+                  </tr>
+                  <tr>
+                    <td>Medical Center (OHCC)</td>
+                    <td>Dr. Smita Rao</td>
+                    <td>Ext. 102 (Ambulance)</td>
+                    <td>CH-05</td>
+                  </tr>
+                  <tr>
+                    <td>Local Fire Dept Coordinator</td>
+                    <td>Station 4</td>
+                    <td>+91 87654 32109</td>
+                    <td>N/A</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
       </main>
     </div>
-
-    </div>
   </div>
-  <!-- Permit View Modal -->
-  <div id="permitModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:var(--vg-bg-surface); border:1px solid var(--vg-border); border-radius:var(--vg-radius-lg); width:100%; max-width:800px; max-height:90vh; display:flex; flex-direction:column; box-shadow:var(--vg-shadow);">
-      <div style="padding:20px; border-bottom:1px solid var(--vg-border); display:flex; justify-content:space-between; align-items:center;">
-        <h3 id="modalTitle" style="font-family:var(--font-outfit); font-size:20px; font-weight:700;">Permit Details</h3>
-        <button onclick="document.getElementById('permitModal').style.display='none'" style="background:transparent; border:none; color:var(--vg-text-secondary); font-size:24px; cursor:pointer;"><i class='bx bx-x'></i></button>
-      </div>
-      <div style="padding:20px; overflow-y:auto; flex:1; font-size:14px; color:var(--vg-text-secondary);">
-        <p>Previewing details for permit securely within the dashboard.</p>
-        <div style="background:var(--vg-bg-input); padding:16px; border-radius:var(--vg-radius); margin-top:16px;">
-          <h4 style="color:var(--vg-text-primary); margin-bottom:8px;">Scope of Work</h4>
-          <p>Confined space entry, chemical residue cleaning, and safety checks verified.</p>
+
+
+  <!-- Safety Passport Modal (3D Flip) -->
+  <div id="safetyPassportModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div class="flip-card" id="safetyFlipCard">
+      <div class="flip-card-inner" onclick="this.parentElement.classList.toggle('flipped')" style="cursor: pointer;">
+        <!-- FRONT SIDE -->
+        <div class="flip-card-front">
+          <div style="background: linear-gradient(135deg, var(--vg-status-success), #0a1128); padding: 24px; display: flex; align-items: center; gap: 20px; position: relative;">
+            <button onclick="closeSafetyPassport(); event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;"><i class='bx bx-x'></i></button>
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16, 185, 129, 0.8); display: flex; align-items: center; justify-content: center; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 32px; color: #fff; font-weight: bold;">SO</div>
+            <div>
+              <h2 id="safety-passport-name" style="margin: 0; color: #fff; font-family: var(--font-outfit); font-size: 24px;">Safety Officer</h2>
+              <p style="margin: 4px 0 0; color: rgba(255,255,255,0.8); font-size: 14px;"><i class='bx bx-shield-quarter'></i> HSE Department</p>
+            </div>
+          </div>
+          <div style="padding: 24px;">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px;">
+              <div style="background: var(--vg-bg-main); padding: 12px; border-radius: 8px; border: 1px solid var(--vg-border); text-align: center;">
+                <div style="font-size: 12px; color: var(--vg-text-muted);">Access Level</div>
+                <div style="font-weight: 600; font-size: 15px; color: var(--vg-status-success); margin-top: 4px;"><i class='bx bx-check-shield'></i> Authorized Personnel</div>
+              </div>
+            </div>
+            
+            <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--vg-text-secondary); border-bottom: 1px solid var(--vg-border); padding-bottom: 8px;">System Privileges</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
+              <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--vg-border);">
+                <span><i class='bx bx-check-circle' style="color: #10b981;"></i> JSA Approvals</span>
+                <span style="color: var(--vg-text-muted);">Full</span>
+              </li>
+              <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--vg-border);">
+                <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Incident Logging</span>
+                <span style="color: var(--vg-text-muted);">Full</span>
+              </li>
+              <li style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span><i class='bx bx-check-circle' style="color: #10b981;"></i> Work Permits</span>
+                <span style="color: var(--vg-status-success);">Authorized</span>
+              </li>
+            </ul>
+            <div style="text-align: center; margin-top: 15px; color: var(--vg-text-muted); font-size: 12px;">
+                 <i class='bx bx-rotate-right'></i> Tap anywhere to flip
+            </div>
+          </div>
+        </div>
+        <!-- BACK SIDE (QR CODE) -->
+        <div class="flip-card-back">
+          <button onclick="closeSafetyPassport(); event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;"><i class='bx bx-x'></i></button>
+          <h3 style="color: #fff; font-family: var(--font-outfit); margin-bottom: 20px;">Digital Passport</h3>
+          <div class="qr-container" style="background: #fff; padding: 15px; border-radius: 12px;">
+            <img id="safety-qr-code" src="" alt="QR Code" width="200" height="200" />
+          </div>
+          <p style="color: rgba(255,255,255,0.7); text-align: center; font-size: 14px; margin-top: 15px;">Scan this QR code to verify identity securely.</p>
+          <div style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.5); font-size: 12px;">
+                 <i class='bx bx-rotate-right'></i> Tap to flip back
+          </div>
         </div>
       </div>
-      <div style="padding:20px; border-top:1px solid var(--vg-border); display:flex; justify-content:flex-end; gap:12px;">
-        <button onclick="document.getElementById('permitModal').style.display='none'" class="vg-btn vg-btn-secondary">Close</button>
-      </div>
-    </div>
     </div>
   </div>
 
   <script>
-    function openPermitModal(permitId) {
-      document.getElementById('modalTitle').innerText = 'Permit Details: ' + permitId;
-      document.getElementById('permitModal').style.display = 'flex';
+    function openSafetyPassport() {
+      const name = sessionStorage.getItem('vg_user_name') || 'Safety Officer';
+      const email = sessionStorage.getItem('vg_user_email') || 'so@visionguard.local';
+      
+      document.getElementById('safety-passport-name').innerText = name;
+      
+      const uid = btoa(email);
+      
+      // Smart URL resolution for mobile access
+      const a = document.createElement('a');
+      a.href = `../php/public/view-passport.php?uid=${uid}`;
+      let publicUrl = a.href;
+      
+      // Fallback for local network access
+      publicUrl = publicUrl.replace('localhost', '192.168.29.18').replace('127.0.0.1', '192.168.29.18');
+      
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=50`;
+      
+      document.getElementById('safety-qr-code').src = `https://quickchart.io/qr?text=${encodeURIComponent(publicUrl)}&size=200&ecLevel=H&centerImageUrl=${encodeURIComponent(avatarUrl)}`;
+      
+      document.getElementById('safetyFlipCard').classList.remove('flipped');
+      document.getElementById('safetyPassportModal').style.display = 'flex';
+    }
+
+    function closeSafetyPassport() {
+      document.getElementById('safetyPassportModal').style.display = 'none';
+      setTimeout(() => document.getElementById('safetyFlipCard').classList.remove('flipped'), 300);
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.vg-sidebar');
+      sidebar.classList.toggle('collapsed');
+    }
+
+    function switchSafetyView(viewId, element) {
+      document.querySelectorAll('.safety-view').forEach(el => el.style.display = 'none');
+      document.getElementById(viewId).style.display = 'block';
+      
+      document.querySelectorAll('.vg-sidebar-nav .vg-nav-link').forEach(el => el.classList.remove('active'));
+      if (element) element.classList.add('active');
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -162,7 +740,7 @@
       window.location.href = 'auth-login-basic.html';
     }
   
-    // Smart Heartbeat: Announce online status
+    // Smart Heartbeat
     window.addEventListener('DOMContentLoaded', () => {
       const token = sessionStorage.getItem('vg_token');
       if (token) {
@@ -173,7 +751,6 @@
       }
     });
 
-    // Smart Heartbeat: Announce offline status on tab close/refresh without destroying session
     window.addEventListener('pagehide', () => {
       const token = sessionStorage.getItem('vg_token');
       if (token) {
@@ -184,7 +761,3 @@
 <script src="../assets/js/vg-loader.js"></script>
 </body>
 </html>
-
-
-
-
